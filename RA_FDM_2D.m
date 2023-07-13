@@ -9,12 +9,10 @@
 
 clear; close all; 
 % Gaussian Implementation
-%{
-dt = 0.005; N=51; L=6; d=L/(N-1); x=[-L/2:d:L/2]; y=[-L/2:d:L/2]; d_x = d; d_y = d;
-xvbar=[0; 0]; P =[1 0; 0 1]; lambda=1; [X_mesh,Y_mesh] = meshgrid(x,y); s = 1; flag=0; % 0: analytical solution
-[p,v_x,v_y]=gaussian(N,x,y,xvbar,P,lambda,s,d_x,d_y,flag);
-title_str = "./Figures/Gauss_" + num2str(s); 
-%}
+dt = 0.003; N=51; L=6; d=L/(N-1); x=[-L/2:d:L/2]; y=[-L/2:d:L/2]; d_x = d; d_y = d;
+xvbar=[0; 0]; P =[1 0.4; 0.4 1]; lambda=1; [X_mesh,Y_mesh] = meshgrid(x,y); s = 2; flag=0; % 0: analytical solution
+title_str = "./Figures/Gauss_" + num2str(s)+ "/Gauss_" + num2str(s); 
+[p,v_x,v_y]=gaussian(N,x,y,xvbar,P,lambda,s,d_x,d_y,flag,title_str);
 
 % Kidney Bean Implementation
 %{
@@ -25,7 +23,8 @@ title_str = "./Figures/Kidney_Bean";
 %}
 
 % Cougar Implementation
-flag = 1; % 1:alpha, 2:KSD Den, 3:KSD Lake
+%{
+flag = 3; % 1:alpha, 2:KSD Den, 3:KSD Lake
 if(flag==1)
     load ./Datasets/cougar_alpha.mat
     title_str = "./Figures/Alpha/Cougar_alpha"; 
@@ -40,6 +39,7 @@ dt = 0.001; lambda=1; N = 51; Lmin_x = -1.5; Lmax_x = 1.5; d_x=(Lmax_x-Lmin_x)/(
 Lmin_y = -2; Lmax_y = 2; d_y=(Lmax_y-Lmin_y)/(N-1); 
 x=[Lmin_x:d_x:Lmax_x]; y=[Lmin_y:d_y:Lmax_y]; [X_mesh,Y_mesh] = meshgrid(x,y); 
 [p,v_x,v_y]=cougar(N,x,y,d_x,d_y,lambda,shp,X_mesh,Y_mesh,flag,title_str);
+%}
 
 % Propagate a new, different PDF to the relaxation goal PDF using the calculated advection field 
 PDF_U = zeros(N,N); 
@@ -146,7 +146,7 @@ end
 timestep=timestep-1; 
 
 figure(5); clf; grid on; hold on; view(30,30); %Iso View
-title(['iter = ', num2str(timestep), ', t = ', num2str(timestep*dt), ', \Delta t = ', num2str(dt), ', ', char(949), ' = ', num2str(eps)]);
+title([]);
 xlabel('x', 'Interpreter', 'Latex')
 ylabel('y', 'Interpreter', 'Latex')
 zlabel('Probability', 'Interpreter', 'Latex')
@@ -155,11 +155,11 @@ clim([0 max_val]);
 xlim([x(1), x(end)])
 ylim([y(1), y(end)])
 surf(X_mesh,Y_mesh,reshape(PDF,[N,N]), 'EdgeColor','none'); 
-exportgraphics(gca,title_str+'_frame_final_iso.eps','Resolution',300)
+%exportgraphics(gca,title_str+'_frame_final_iso.eps','Resolution',300)
 drawnow
 
 figure(6); clf; grid on; hold on; view(0,90); %Top View
-title(['iter = ', num2str(timestep), ', t = ', num2str(timestep*dt), ', \Delta t = ', num2str(dt), ', ', char(949), ' = ', num2str(eps_new)]);
+title([]);
 xlabel('x', 'Interpreter', 'Latex')
 ylabel('y', 'Interpreter', 'Latex')
 zlabel('Probability', 'Interpreter', 'Latex')
@@ -171,7 +171,7 @@ end
 xlim([x(1), x(end)])
 ylim([y(1), y(end)])
 contour(X_mesh,Y_mesh,reshape(PDF,[N,N]),[linspace(0.01,max_val,10)]); 
-exportgraphics(gca,title_str+'_frame_final_top.eps','Resolution',300)
+%exportgraphics(gca,title_str+'_frame_final_top.eps','Resolution',300)
 drawnow
 
 figure(7); clf; grid on; hold on;
@@ -181,13 +181,12 @@ ylabel('$\epsilon$', 'Interpreter', 'Latex')
 xlim([1,inf])
 ylim([0,inf])
 plot(timestep_list, eps_list);
-exportgraphics(gca,title_str+'_epsilon.eps','Resolution',300)
+%exportgraphics(gca,title_str+'_epsilon.eps','Resolution',300)
 drawnow
     
-create_video(F_top, title_str + '_top_2D.mp4');
-%create_video(F_iso, title_str + '_iso_2D.mp4');
+%create_video(F_top, title_str + '_top_2D.mp4');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [p,v_x,v_y]=gaussian(N,x,y,xvbar,P,lambda,s,d_x,d_y,flag)
+function [p,v_x,v_y]=gaussian(N,x,y,xvbar,P,lambda,s,d_x,d_y,flag,title_str)
 v_x = zeros(N,N); v_y =v_x; dim=2;
 
 B = gamma((dim+2)/(2*s))/(dim*gamma(dim/(2*s)));
@@ -204,7 +203,6 @@ for i=1:N
 end
 p = reshape(p,[N,N]);
 
-title_str = "Gauss_" + num2str(s); 
 make_plots(x,y,p,v_x,v_y,title_str,flag,lambda);
 end % end function gaussian
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -379,7 +377,7 @@ function make_plots(x,y,p,v_x,v_y,title_str,flag,lambda)
     contour(X_mesh,Y_mesh,p,[linspace(0.01,max_val,10)]);
     tightfig;
     ax = gca;
-    exportgraphics(ax,title_str + '_relax_pdf_top.eps','Resolution',300)
+    %exportgraphics(ax,title_str + '_relax_pdf_top.eps','Resolution',300)
     drawnow
 
     figure(2); clf; grid on; hold on; view(30,30); %Top View
@@ -393,7 +391,7 @@ function make_plots(x,y,p,v_x,v_y,title_str,flag,lambda)
     surf(X_mesh,Y_mesh,p,'EdgeColor','none');
     tightfig;
     ax = gca;
-    exportgraphics(ax,title_str + '_relax_pdf_iso.eps','Resolution',300)
+    %exportgraphics(ax,title_str + '_relax_pdf_iso.eps','Resolution',300)
     drawnow
 
     figure(3); clf; grid on; hold on;
@@ -407,7 +405,7 @@ function make_plots(x,y,p,v_x,v_y,title_str,flag,lambda)
     quiver(X_mesh,Y_mesh,v_x,v_y)
     tightfig;
     ax = gca;
-    exportgraphics(ax,title_str+'_adv.eps','Resolution',300)
+    %exportgraphics(ax,title_str+'_adv.eps','Resolution',300)
     drawnow
 
     phi = lambda*log(p); 
@@ -431,7 +429,7 @@ function make_plots(x,y,p,v_x,v_y,title_str,flag,lambda)
     contour(X_mesh,Y_mesh,phi,levels);
     tightfig;
     ax = gca;
-    exportgraphics(ax,title_str + '_relax_phi_top.eps','Resolution',300)
+    %exportgraphics(ax,title_str + '_relax_phi_top.eps','Resolution',300)
     drawnow
 end % end function make_plots
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -466,7 +464,8 @@ function [eps_new,F1,F2] = plot_PDF(p,PDF,timestep,dt,x,y,X_mesh,Y_mesh,N,max_va
     surf(X_mesh,Y_mesh,PDF_plot, 'EdgeColor','none'); 
     F1 = getframe(gcf);
     if (mod(timestep,100)==0)
-        exportgraphics(gca,title_str+'_frame_'+num2str(timestep)+'_iso.eps','Resolution',300)
+        title([]);
+        %exportgraphics(gca,title_str+'_frame_'+num2str(timestep)+'_iso.eps','Resolution',300)
     end
     drawnow
 
@@ -485,7 +484,8 @@ function [eps_new,F1,F2] = plot_PDF(p,PDF,timestep,dt,x,y,X_mesh,Y_mesh,N,max_va
     contour(X_mesh,Y_mesh,PDF_plot,[linspace(0.01,max_val,10)]); 
     F2 = getframe(gcf);
     if (mod(timestep,100)==0)
-        exportgraphics(gca,title_str+'_frame_'+num2str(timestep)+'_top.eps','Resolution',300)
+        title([]);
+        %exportgraphics(gca,title_str+'_frame_'+num2str(timestep)+'_top.eps','Resolution',300)
     end
     drawnow
 

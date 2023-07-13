@@ -1,11 +1,10 @@
 n=50000;
 x1=2*rand(n,1)-1; y1=2*rand(n,1)+x1.*x1-1.5;
 
-s=0.4; shp = alphaShape(x1,y1,s);
+s=0.1; shp = alphaShape(x1,y1,s);
 figure(1); clf; 
 plot(shp,'EdgeColor','none'); hold on; plot(x1,y1,'kx','MarkerSize',12);
 axis normal; axis([-1 1 -1.5 1.5]);
-text(0,1,sprintf('Smoothing = %0.2g',s),'HorizontalAlignment','center')
 save('./Datasets/cougar_alpha.mat', 'shp')
 
 mu1 = [-0.75 -0.5]; sigma1 = [0.1 0; 0 0.1]; r1 = 1.5*sqrt(0.1); 
