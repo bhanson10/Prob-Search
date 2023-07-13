@@ -22,23 +22,23 @@ x=[Lmin:d:Lmax]; y=[Lmin:d:Lmax]; [X_mesh,Y_mesh] = meshgrid(x,y); flag = 1; % n
 title_str = "./Figures/Kidney_Bean"; 
 %}
 
-% Cougar Implementation
+% Numerical Implementation
 %{
 flag = 3; % 1:alpha, 2:KSD Den, 3:KSD Lake
 if(flag==1)
-    load ./Datasets/cougar_alpha.mat
-    title_str = "./Figures/Alpha/Cougar_alpha"; 
+    load ./Datasets/alpha.mat
+    title_str = "./Figures/Alpha/alpha"; 
 elseif(flag==2)
-    load ./Datasets/cougar_ksd_den.mat
-    title_str = "./Figures/Den/Cougar_ksd_den"; 
+    load ./Datasets/kde_den.mat
+    title_str = "./Figures/Den/kde_den"; 
 elseif(flag==3)
-    load ./Datasets/cougar_ksd_lake.mat
-    title_str = "./Figures/Lake/Cougar_ksd_lake"; 
+    load ./Datasets/kde_lake.mat
+    title_str = "./Figures/Lake/kde_lake"; 
 end
 dt = 0.001; lambda=1; N = 51; Lmin_x = -1.5; Lmax_x = 1.5; d_x=(Lmax_x-Lmin_x)/(N-1);
 Lmin_y = -2; Lmax_y = 2; d_y=(Lmax_y-Lmin_y)/(N-1); 
 x=[Lmin_x:d_x:Lmax_x]; y=[Lmin_y:d_y:Lmax_y]; [X_mesh,Y_mesh] = meshgrid(x,y); 
-[p,v_x,v_y]=cougar(N,x,y,d_x,d_y,lambda,shp,X_mesh,Y_mesh,flag,title_str);
+[p,v_x,v_y]=numerical(N,x,y,d_x,d_y,lambda,shp,X_mesh,Y_mesh,flag,title_str);
 %}
 
 % Propagate a new, different PDF to the relaxation goal PDF using the calculated advection field 
@@ -260,7 +260,7 @@ v_y(:,1) = 0; v_y(:,end) = 0; v_y(1,:) = 0; v_y(end,:) = 0;
 make_plots(x,y,p,v_x,v_y, "Kidney_Bean",2,lambda);
 end % end function kidney_bean
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [p,v_x,v_y]=cougar(N,x,y,d_x,d_y,lambda,shp,X_mesh,Y_mesh,flag,title_str)
+function [p,v_x,v_y]=numerical(N,x,y,d_x,d_y,lambda,shp,X_mesh,Y_mesh,flag,title_str)
 p = zeros(N,N); dt = 0.001;
 
 if(flag==1) % Alpha-convex hull approximation

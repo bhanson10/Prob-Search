@@ -5,7 +5,7 @@ s=0.1; shp = alphaShape(x1,y1,s);
 figure(1); clf; 
 plot(shp,'EdgeColor','none'); hold on; plot(x1,y1,'kx','MarkerSize',12);
 axis normal; axis([-1 1 -1.5 1.5]);
-save('./Datasets/cougar_alpha.mat', 'shp')
+save('./Datasets/alpha.mat', 'shp')
 
 mu1 = [-0.75 -0.5]; sigma1 = [0.1 0; 0 0.1]; r1 = 1.5*sqrt(0.1); 
 mu2 = [0.5 -0.3]; sigma2 = [0.1 0; 0 0.1]; r2x = 0.2; r2y = 0.6;  
@@ -21,7 +21,7 @@ while (count < (n/4))
     end
 end
 s=0.4; shp = alphaShape(x1,y1,s);
-save('./Datasets/cougar_ksd_den.mat', 'shp')
+save('./Datasets/kde_den.mat', 'shp')
 
 theta = linspace(0, 2*pi, 1000);
 circ_x1 = []; circ_y1 = []; 
@@ -51,7 +51,7 @@ for i=1:n
     end
 end
 s=0.4; shp = alphaShape(lake_x,lake_y,s);
-save('./Datasets/cougar_ksd_lake.mat', 'shp')
+save('./Datasets/kde_lake.mat', 'shp')
 
 figure(2); clf; hold on;
 plot(x1,y1,'kx','MarkerSize',12);

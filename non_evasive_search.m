@@ -19,11 +19,11 @@ if(target.stats_flag == 1)
 else
     flag = 1; % 1:alpha, 2:KSD Den, 3:KSD Lake
     if(flag==1)
-        load ./Datasets/cougar_alpha.mat
+        load ./Datasets/alpha.mat
     elseif(flag==2)
-        load ./Datasets/cougar_ksd_den.mat
+        load ./Datasets/kde_den.mat
     elseif(flag==3)
-        load ./Datasets/cougar_ksd_lake.mat
+        load ./Datasets/kde_lake.mat
     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% Target Constants %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -56,7 +56,7 @@ end
 if(target.stats_flag == 1)
     [target.p,target.v_x,target.v_y]=target_gauss(N,x,y,target.xvbar,target.P,target.s,target.lambda,d_x,d_y);
 else
-    [target.p,target.v_x,target.v_y]=target_cougar(N,x,y,d_x,d_y,target.lambda,shp,X_mesh,Y_mesh,flag);
+    [target.p,target.v_x,target.v_y]=target_numer(N,x,y,d_x,d_y,target.lambda,shp,X_mesh,Y_mesh,flag);
 end
 
 fig = figure(1); clf; hold on; fig.Position = [150 150 1200 600];
@@ -289,7 +289,7 @@ function p=search_gauss(N,x,y,q,sigma,a)
     p = reshape(p,[N*N,1]);
 end % end function gaussian
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [p,v_x,v_y]=target_cougar(N,x,y,d_x,d_y,lambda,shp,X_mesh,Y_mesh,flag)
+function [p,v_x,v_y]=target_numer(N,x,y,d_x,d_y,lambda,shp,X_mesh,Y_mesh,flag)
 p = zeros(N,N); dt = 0.0005;
 
 if(flag==1) % lambda-convex hull approximation
