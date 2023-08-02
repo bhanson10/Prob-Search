@@ -375,7 +375,6 @@ function make_plots(x,y,p,v_x,v_y,title_str,flag,lambda)
     xlim([x(1) x(end)])
     ylim([y(1) y(end)])
     contour(X_mesh,Y_mesh,p,[linspace(0.01,max_val,10)]);
-    tightfig;
     ax = gca;
     %exportgraphics(ax,title_str + '_relax_pdf_top.eps','Resolution',300)
     drawnow
@@ -389,7 +388,6 @@ function make_plots(x,y,p,v_x,v_y,title_str,flag,lambda)
     xlim([x(1) x(end)])
     ylim([y(1) y(end)])
     surf(X_mesh,Y_mesh,p,'EdgeColor','none');
-    tightfig;
     ax = gca;
     %exportgraphics(ax,title_str + '_relax_pdf_iso.eps','Resolution',300)
     drawnow
@@ -403,7 +401,6 @@ function make_plots(x,y,p,v_x,v_y,title_str,flag,lambda)
     xlim([x(1) x(end)])
     ylim([y(1) y(end)])
     quiver(X_mesh,Y_mesh,v_x,v_y)
-    tightfig;
     ax = gca;
     %exportgraphics(ax,title_str+'_adv.eps','Resolution',300)
     drawnow
@@ -427,7 +424,6 @@ function make_plots(x,y,p,v_x,v_y,title_str,flag,lambda)
     colormap(cmp); 
     colorbar; 
     contour(X_mesh,Y_mesh,phi,levels);
-    tightfig;
     ax = gca;
     %exportgraphics(ax,title_str + '_relax_phi_top.eps','Resolution',300)
     drawnow
