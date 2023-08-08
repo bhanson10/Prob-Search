@@ -33,19 +33,19 @@ To choose one of these specific PDF options, comment out the other instances tha
 
 The non-evasive search code demonstrates how the relaxation advection can be used to demonstrate the rate of change of confidence in observations searching for a stationary target in a ROI. For the non-evasive target, we assume that the location of the search vehicles has no impact on the behavior of the target, thus the observations act as negative driving forces that lower the probability at the location of the search vehicle, and the relaxation advection acts as a driving force towards the steady-state. After the observations are done being taken, as $t\rightarrow \infty$ the PDF returns to its steady-state. 
 
-### Tunable Simulation Constansts
+#### Tunable Simulation Constansts
 &ensp; &ensp; - _.T_: total time of the search <br>
 &ensp; &ensp; - _.dt_: time step size of simulation <br>
 &ensp; &ensp; - _N_: size of cartesian grid <br>
 &ensp; &ensp; - _L_x_,_L_y_: length of cartesian grid in $x$-, $y$-direction <br>
 
-### Tunable Target Constansts
+#### Tunable Target Constansts
 &ensp; &ensp; - _.lambda_: same as above <br>
 &ensp; &ensp; - _.stats_flag_: choose which initial PDF to start with <br>
 &ensp; &ensp; &ensp; &ensp; * _stats_flag_$==1$: Gaussian statstics described by parameters above <br>
 &ensp; &ensp; &ensp; &ensp; * else: numerical statistics dependent on _flag_ where the datasets are the same as previously stated <br>
 
-### Tunable Drone/Search vehicle Constansts
+#### Tunable Drone/Search vehicle Constansts
 &ensp; &ensp; - _.num_: number of search vehicles <br>
 &ensp; &ensp; - _.ang_speed_: andgular speed of each search vehicle <br>
 &ensp; &ensp; - _.init_theta_: initial starting position of each search vehicle <br>
@@ -62,11 +62,11 @@ The simulation generates the initial PDF chosen as well as the orbits of the sea
 
 The evasive search code demonstrates how the relaxation advection can be used to demonstrate the rate of change of confidence in observations searching for a stationary target in a ROI. For the evasive target, we assume that the magnitude and direction of the target is impacted by the locations of the search vehicles, and that the target's velocity will point away from the center of the search vehicle. If the search vehicle is closer by, the magnitude of the velocity will be higher, and the random motion will be more sporadic. The evasive velocity is modeled as the negative gradient of a super-Gaussian with $s=0.6$ (so as to avoid increasingly larger velocities if the search vehicle and the target share the same location) and the diffusion is modeled as the superposition of super-Gaussians placed at the locations of the search vehicles. In the background of the total advection field is the relaxation advection, such that there is still a desire to return to the general ROI, though it is scaled so as to not be overbearing. 
 
-### Tunable Target Constansts (not already stated)
+#### Tunable Target Constansts (not already stated)
 &ensp; &ensp; - _.psi_: skittishness of target (see paper) <br>
 
 
-### Tunable Drone/Search vehicle Constansts (not already stated)
+#### Tunable Drone/Search vehicle Constansts (not already stated)
 &ensp; &ensp; &ensp; &ensp; * _orbit_flag_$==4$: Rotating, "herding" Cassini ovals, preferable orbit family for evasive search (see paper) <br>
 &ensp; &ensp; - _.sigma_: width of field-of-view of observations of search vehicle <br>
 &ensp; &ensp; - _.P_: covariance of super-Gaussian used for determining advection and diffusion <br>
