@@ -9,8 +9,8 @@
 
 clear; close all; 
 % Gaussian Implementation
-dt = 0.003; N=51; L=6; d=L/(N-1); x=[-L/2:d:L/2]; y=[-L/2:d:L/2]; d_x = d; d_y = d;
-xvbar=[0; 0]; P =[1 0.4; 0.4 1]; lambda=1; [X_mesh,Y_mesh] = meshgrid(x,y); s = 2; flag=0; % 0: analytical solution
+dt = 0.0003; N=51; L=6; d=L/(N-1); x=[-L/2:d:L/2]; y=[-L/2:d:L/2]; d_x = d; d_y = d;
+xvbar=[0; 0]; P =[1 0.4; 0.4 1]; lambda=1; [X_mesh,Y_mesh] = meshgrid(x,y); s = 3; flag=0; % 0: analytical solution
 title_str = "./Figures/Gauss_" + num2str(s)+ "/Gauss_" + num2str(s); 
 [p,v_x,v_y]=gaussian(N,x,y,xvbar,P,lambda,s,d_x,d_y,flag,title_str);
 
@@ -22,8 +22,8 @@ x=[Lmin:d:Lmax]; y=[Lmin:d:Lmax]; [X_mesh,Y_mesh] = meshgrid(x,y); flag = 1; % n
 title_str = "./Figures/Kidney_Bean"; 
 %}
 
-% Numerical Implementation
 %{
+% Numerical Implementation
 flag = 3; % 1:alpha, 2:KSD Den, 3:KSD Lake
 if(flag==1)
     load ./Datasets/alpha.mat
@@ -65,6 +65,7 @@ xlim([x(1), x(end)])
 ylim([y(1), y(end)])
 surf(X_mesh,Y_mesh,reshape(PDF_U,[N,N]), 'EdgeColor','none'); 
 F_iso(1) = getframe(gcf);
+set( gcf , 'Color' , 'w' );
 drawnow
 
 figure(6); clf; grid on; hold on; view(0,90); %Top View
@@ -79,8 +80,9 @@ if(flag==0)
 end
 xlim([x(1), x(end)])
 ylim([y(1), y(end)])
-contour(X_mesh,Y_mesh,reshape(PDF_U,[N,N]),[linspace(0.01,max_val,10)]); 
+contour(X_mesh,Y_mesh,reshape(PDF_U,[N,N]),[linspace(0.01,max_val,10)], 'LineWidth',2);
 F_top(1) = getframe(gcf); 
+set( gcf , 'Color' , 'w' );
 drawnow
 
 %Initializing F component 
@@ -130,7 +132,8 @@ PDF = reshape(PDF_U, [N*N,1]); p = reshape(p,[N*N,1]);
 eps=sum(abs(p-PDF)); diff = 1; % Initializing Difference to be above 0.01
 
 timestep = 1; timestep_list = [timestep]; eps_list = [eps]; 
-while(diff > 0.01)
+while(timestep < 50)
+%while(diff > 0.01)
   K1=M*PDF;
   K2=M*(PDF+(dt/2)*K1);
   K3=M*(PDF+(dt/2)*K2);
@@ -141,7 +144,6 @@ while(diff > 0.01)
   F_iso(timestep) = F1; F_top(timestep) = F2;
   timestep=timestep+1; diff = abs(eps-eps_new); eps = eps_new; 
   timestep_list(end+1) = timestep; eps_list(end+1) = eps_new;
-  disp(diff);
 end 
 timestep=timestep-1; 
 
@@ -155,7 +157,8 @@ clim([0 max_val]);
 xlim([x(1), x(end)])
 ylim([y(1), y(end)])
 surf(X_mesh,Y_mesh,reshape(PDF,[N,N]), 'EdgeColor','none'); 
-%exportgraphics(gca,title_str+'_frame_final_iso.eps','Resolution',300)
+exportgraphics(gca,title_str+'_frame_final_iso.eps','Resolution',300)
+set( gcf , 'Color' , 'w' );
 drawnow
 
 figure(6); clf; grid on; hold on; view(0,90); %Top View
@@ -170,8 +173,9 @@ if(flag==0)
 end
 xlim([x(1), x(end)])
 ylim([y(1), y(end)])
-contour(X_mesh,Y_mesh,reshape(PDF,[N,N]),[linspace(0.01,max_val,10)]); 
-%exportgraphics(gca,title_str+'_frame_final_top.eps','Resolution',300)
+contour(X_mesh,Y_mesh,reshape(PDF,[N,N]),[linspace(0.01,max_val,10)], 'LineWidth',2);
+exportgraphics(gca,title_str+'_frame_final_top.eps','Resolution',300)
+set( gcf , 'Color' , 'w' );
 drawnow
 
 figure(7); clf; grid on; hold on;
@@ -181,10 +185,12 @@ ylabel('$\epsilon$', 'Interpreter', 'Latex')
 xlim([1,inf])
 ylim([0,inf])
 plot(timestep_list, eps_list);
-%exportgraphics(gca,title_str+'_epsilon.eps','Resolution',300)
+exportgraphics(gca,title_str+'_epsilon.eps','Resolution',300)
+set( gcf , 'Color' , 'w' );
 drawnow
     
-%create_video(F_top, title_str + '_top_2D.mp4');
+create_video(F_top, title_str + '_top_2D.mp4');
+create_video(F_iso, title_str + '_iso_2D.mp4');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [p,v_x,v_y]=gaussian(N,x,y,xvbar,P,lambda,s,d_x,d_y,flag,title_str)
 v_x = zeros(N,N); v_y =v_x; dim=2;
@@ -374,9 +380,9 @@ function make_plots(x,y,p,v_x,v_y,title_str,flag,lambda)
     end
     xlim([x(1) x(end)])
     ylim([y(1) y(end)])
-    contour(X_mesh,Y_mesh,p,[linspace(0.01,max_val,10)]);
+    contour(X_mesh,Y_mesh,p,[linspace(0.01,max_val,10)], 'LineWidth',2);
     ax = gca;
-    %exportgraphics(ax,title_str + '_relax_pdf_top.eps','Resolution',300)
+    exportgraphics(ax,title_str + '_relax_pdf_top.eps','Resolution',300)
     drawnow
 
     figure(2); clf; grid on; hold on; view(30,30); %Top View
@@ -389,7 +395,7 @@ function make_plots(x,y,p,v_x,v_y,title_str,flag,lambda)
     ylim([y(1) y(end)])
     surf(X_mesh,Y_mesh,p,'EdgeColor','none');
     ax = gca;
-    %exportgraphics(ax,title_str + '_relax_pdf_iso.eps','Resolution',300)
+    exportgraphics(ax,title_str + '_relax_pdf_iso.eps','Resolution',300)
     drawnow
 
     figure(3); clf; grid on; hold on;
@@ -402,7 +408,7 @@ function make_plots(x,y,p,v_x,v_y,title_str,flag,lambda)
     ylim([y(1) y(end)])
     quiver(X_mesh,Y_mesh,v_x,v_y)
     ax = gca;
-    %exportgraphics(ax,title_str+'_adv.eps','Resolution',300)
+    exportgraphics(ax,title_str+'_adv.eps','Resolution',300)
     drawnow
 
     phi = lambda*log(p); 
@@ -423,9 +429,9 @@ function make_plots(x,y,p,v_x,v_y,title_str,flag,lambda)
     cmp = flipud(cmp);
     colormap(cmp); 
     colorbar; 
-    contour(X_mesh,Y_mesh,phi,levels);
+    contour(X_mesh,Y_mesh,phi,levels, 'LineWidth',2);
     ax = gca;
-    %exportgraphics(ax,title_str + '_relax_phi_top.eps','Resolution',300)
+    exportgraphics(ax,title_str + '_relax_phi_top.eps','Resolution',300)
     drawnow
 end % end function make_plots
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -459,10 +465,11 @@ function [eps_new,F1,F2] = plot_PDF(p,PDF,timestep,dt,x,y,X_mesh,Y_mesh,N,max_va
     ylim([y(1), y(end)])
     surf(X_mesh,Y_mesh,PDF_plot, 'EdgeColor','none'); 
     F1 = getframe(gcf);
-    if (mod(timestep,100)==0)
+    if (mod(timestep,50)==0)
         title([]);
-        %exportgraphics(gca,title_str+'_frame_'+num2str(timestep)+'_iso.eps','Resolution',300)
+        exportgraphics(gca,title_str+'_frame_'+num2str(timestep)+'_iso.eps','Resolution',300)
     end
+    set( gcf , 'Color' , 'w' );
     drawnow
 
     figure(6); clf; grid on; hold on; view(0,90); %Top View
@@ -477,12 +484,13 @@ function [eps_new,F1,F2] = plot_PDF(p,PDF,timestep,dt,x,y,X_mesh,Y_mesh,N,max_va
     end
     xlim([x(1), x(end)])
     ylim([y(1), y(end)])
-    contour(X_mesh,Y_mesh,PDF_plot,[linspace(0.01,max_val,10)]); 
+    contour(X_mesh,Y_mesh,PDF_plot,[linspace(0.01,max_val,10)], 'LineWidth',2);
     F2 = getframe(gcf);
-    if (mod(timestep,100)==0)
+    if (mod(timestep,50)==0)
         title([]);
-        %exportgraphics(gca,title_str+'_frame_'+num2str(timestep)+'_top.eps','Resolution',300)
+        exportgraphics(gca,title_str+'_frame_'+num2str(timestep)+'_top.eps','Resolution',300)
     end
+    set( gcf , 'Color' , 'w' );
     drawnow
 
     figure(7); clf; grid on; hold on;
@@ -492,6 +500,7 @@ function [eps_new,F1,F2] = plot_PDF(p,PDF,timestep,dt,x,y,X_mesh,Y_mesh,N,max_va
     xlim([1,inf])
     ylim([0,inf])
     plot(timestep_list, eps_list);
+    set( gcf , 'Color' , 'w' );
     drawnow
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
