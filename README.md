@@ -1,21 +1,22 @@
 # Prob-Search
-The "Prob-Search" repsository containes the codebase accompying the paper "An extensible framework for Probabilistic Search for stationary 
-or randomly-moving targets characterized by super-Gaussian or experimentally-defined Regions of Interest (ROI)" published in ___. Below is an in-depth summary
+The "Prob-Search" repository contains the codebase accompanying the paper "An Extensible Framework for Probabilistic Search of Stationary or Randomly-moving Targets Characterized by Generalized Gaussian Distributions (GGDs) or Experimentally-defined Regions of Interest (ROI)" submitted to SIAMJUQ. Below is an in-depth summary
 explaining the proper usage of all the software included in said repository. In all, the codebase provides the computational framework necessary
 to: <br> <br>
+
 &ensp; &ensp; &ensp; 1. Generate the relaxation advection field that drives an arbitrary PDF to a steady-state shape for either analytical or numerical PDFs <br>
 &ensp; &ensp; &ensp; 2. Drive said arbitrary PDF using the relaxation advection field and isotropic diffusion (as well as create animations of this process) <br>
-&ensp; &ensp; &ensp; 3. Use the relaxaction advection field to perform a non-evasive search process with _n_ search vehicles on varying orbits <br>
-&ensp; &ensp; &ensp; 4. Use the relaxaction advection field plus an additional field function to perform an evasive search process with _n_ search vehicles on varying orbits <br>
+&ensp; &ensp; &ensp; 3. Use the relaxation advection field to perform a non-evasive search process with _n_ search vehicles on varying orbits <br>
+&ensp; &ensp; &ensp; 4. Use the relaxation advection field plus an additional field function to perform an evasive search process with _n_ search vehicles on varying orbits <br>
+&ensp; &ensp; &ensp; 5. Examine the characteristics of the newly-defined Generalized Gaussian Distribution (GGD) and Generalized Gaussian Distribution with Anisotropic Flatness (GGDAF) <br>
 
 ## relaxation_advection.m
 The purpose of _relaxation_advection.m_ is to achieve Objective 1 and 2, generating the relaxation advection field for analytical and numerical PDFs and demonstrating that the relaxation advection field does as it should by driving an arbitrary PDF with it. We begin by generating an initial PDF to use as our test case. The following are possible options for initial PDFs: <br>
 
-&ensp; &ensp; &ensp; 1. **Gaussian/super-Gaussians** <br>
+&ensp; &ensp; &ensp; 1. **Gaussian/Generalized Gaussians** <br>
 &ensp; &ensp; &ensp; &ensp; - Parameters that may be varied: <br>
-&ensp; &ensp; &ensp; &ensp; &ensp; * _xvbar_: Mean of Gaussian/super-Gaussian <br>
-&ensp; &ensp; &ensp; &ensp; &ensp; * _P_: covariance of Gaussian/super-Gaussian <br>
-&ensp; &ensp; &ensp; &ensp; &ensp; * _s_: order of Gaussian/super-Gaussian ($s>1$ is considered a super-Gaussian in this context)<br>
+&ensp; &ensp; &ensp; &ensp; &ensp; * _xvbar_: Mean of Gaussian/GG <br>
+&ensp; &ensp; &ensp; &ensp; &ensp; * $\Sigma$: covariance of Gaussian/GG <br>
+&ensp; &ensp; &ensp; &ensp; &ensp; * $\beta$: order of Gaussian/GG ($\beta\neq1$ is considered a GG in this context)<br>
 &ensp; &ensp; &ensp; 2. **Kidney Bean** <br>
 &ensp; &ensp; &ensp; &ensp; - This PDF is a fairly rigid example, meant to demonstrate a PDF that is shaped like a kidney bean. For this reason, changing the default parameters may cause problems <br>
 &ensp; &ensp; &ensp; 3. **Numerical PDFs** <br>
@@ -60,7 +61,7 @@ The simulation generates the initial PDF chosen as well as the orbits of the sea
 
 ## evasive_search.m
 
-The evasive search code demonstrates how the relaxation advection can be used to demonstrate the rate of change of confidence in observations searching for a stationary target in a ROI. For the evasive target, we assume that the magnitude and direction of the target is impacted by the locations of the search vehicles, and that the target's velocity will point away from the center of the search vehicle. If the search vehicle is closer by, the magnitude of the velocity will be higher, and the random motion will be more sporadic. The evasive velocity is modeled as the negative gradient of a super-Gaussian with $s=0.6$ (so as to avoid increasingly larger velocities if the search vehicle and the target share the same location) and the diffusion is modeled as the superposition of super-Gaussians placed at the locations of the search vehicles. In the background of the total advection field is the relaxation advection, such that there is still a desire to return to the general ROI, though it is scaled so as to not be overbearing. 
+The evasive search code demonstrates how the relaxation advection can be used to demonstrate the rate of change of confidence in observations searching for a stationary target in a ROI. For the evasive target, we assume that the magnitude and direction of the target is impacted by the locations of the search vehicles, and that the target's velocity will point away from the center of the search vehicle. If the search vehicle is closer by, the magnitude of the velocity will be higher, and the random motion will be more sporadic. The evasive velocity is modeled as the negative gradient of a super-Gaussian with $\beta=0.6$ (so as to avoid increasingly larger velocities if the search vehicle and the target share the same location) and the diffusion is modeled as the superposition of super-Gaussians placed at the locations of the search vehicles. In the background of the total advection field is the relaxation advection, such that there is still a desire to return to the general ROI, though it is scaled so as to not be overbearing. 
 
 ### Tunable Target Constansts (not already stated)
 &ensp; &ensp; - _.psi_: skittishness of target (see paper) <br>
@@ -73,5 +74,10 @@ The evasive search code demonstrates how the relaxation advection can be used to
 
 The simulation generates the initial PDF chosen as well as the orbits of the search vehicles, then demonstrates how the PDF changes as the observations drive the probabilty down and the advection field drives the proabability around depending on the location of the drones as well as the steady-state. An apparent herding effect is demonstrated when using the "herding" orbit path, as is the goal for evasive target searching. <br> <br>
 
-For further information about code usage, please contact blhanson@ucsd.edu
+## kurtosis.m
+The code plots the kurtosis of the GGD $\gamma_2(\beta)$. Demonstrated by the code is that the kurtosis of the GGD aligns with the Gaussian distribution ($\gamma_2(1)=0$), the Laplacian distribution ($\gamma_2(0.5)=3$), and the uniform distribution ($\gamma_2(\beta\rightarrow\infty)\rightarrow -1.2$). We also see that ($\gamma_2(\beta\rightarrow 0)\rightarrow \infty$). This code creates Figure 6 in the paper. 
 
+## GGDAF.m
+Here we demonstrate the GGDAF formulation with three different conditions, one where $\beta_i=\beta_j=\beta$, and two where this is not the case. Note that this formulation works even when $\Sigma$ is not diagonal. This code creates Figure 7 in the paper. 
+
+For further information about code usage, please contact blhanson@ucsd.edu
