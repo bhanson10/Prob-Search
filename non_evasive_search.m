@@ -1,4 +1,15 @@
+% non_evasive_search.m 
+%
+% This simulation takes a steady state PDF, generates the relaxation
+% advection (either analytically or numerically depending on the
+% steady-state), and includes the advection in a probablistic search
+% simulation. The behavior of the target in this simulation is assumed to
+% be non-evasive.
+%
+% By Benjamin L. Hanson, Feb 23 2024
+
 clear all; close; clc; 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%% Simulation Constants %%%%%%%%%%%%%%%%%%%%%%%%%%%
 sim.T = 2; sim.dt = 0.001; sim.timesteps = round(sim.T/sim.dt); sim.FrameRate = round(.1/sim.dt);
 theta = linspace(0,2*pi, 1000); 

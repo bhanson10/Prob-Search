@@ -1,4 +1,15 @@
+% evasive_search.m 
+%
+% This simulation takes a steady state PDF, generates the relaxation
+% advection (either analytically or numerically depending on the
+% steady-state), and includes the advection in a probablistic search
+% simulation. The behavior of the target in this simulation is assumed to
+% be evasive.
+%
+% By Benjamin L. Hanson, Feb 23 2024
+
 clear all; close; clc; 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%% Simulation Constants %%%%%%%%%%%%%%%%%%%%%%%%%%%
 sim.T = 4; sim.dt = 0.0025; sim.timesteps = round(sim.T/sim.dt); sim.FrameRate = round(.1/sim.dt);
 theta = linspace(0,2*pi, 1000); 
@@ -77,12 +88,13 @@ else
 end
 
 fig = figure(1); clf; hold on; fig.Position = [150 150 1200 600];
-sgtitle(['Pre-search, iter = 0, t = 0, \Delta', 't = ', num2str(sim.dt), ', \lambda = ', num2str(target.lambda)]);
+set(gca, 'FontName' , 'Times','FontSize',12);
+sgtitle(['Pre-search, iter = 0, t = 0, \Delta', 't = ', num2str(sim.dt), ', \lambda = ', num2str(target.lambda)], 'FontSize', 16, 'FontName', 'Times');
 
 subplot(1,2,1); hold on; 
-xlabel('x','FontSize',16,'Interpreter','latex');
-ylabel('y','FontSize',16,'Interpreter','latex');
-zlabel('$p$','FontSize',16,'Interpreter','latex');
+xlabel('x', 'FontSize', 16, 'FontName', 'Times')
+ylabel('y', 'FontSize', 16, 'FontName', 'Times')
+zlabel('Probability', 'FontSize', 16, 'FontName', 'Times')
 xlim([x(1),x(end)]);
 ylim([y(1),y(end)]);
 if(target.stats_flag==1)
@@ -91,9 +103,9 @@ end
 view(0,90); colorbar;
 
 subplot(1,2,2);  hold on; 
-xlabel('x','FontSize',16,'Interpreter','latex');
-ylabel('y','FontSize',16,'Interpreter','latex');
-zlabel('$p$','FontSize',16,'Interpreter','latex');
+xlabel('x', 'FontSize', 16, 'FontName', 'Times')
+ylabel('y', 'FontSize', 16, 'FontName', 'Times')
+zlabel('Probability', 'FontSize', 16, 'FontName', 'Times')
 xlim([x(1),x(end)]);
 ylim([y(1),y(end)]);
 zlim([0, inf]);
@@ -174,10 +186,16 @@ for i=1:sim.timesteps
     subplot(1,2,2); 
     plots_2(1) = surf(X_mesh,Y_mesh,reshape(target.p,[N,N]),'EdgeColor','none','FaceAlpha',0.7); 
     
-    sgtitle(['Evasive searching, iter = ',num2str(i), ', t = ', num2str(t), ', \Delta t = ', num2str(sim.dt), ', \lambda = ', num2str(target.lambda), ', \psi = ', num2str(target.psi), ', a = ', num2str(drones.a*sim.dt), '/\Delta','t, \sigma = ', num2str(drones.sigma),', d = ', num2str(drones.d)]);
-    frames(i+1) = getframe(gcf); 
-    drawnow; 
- 
+    sgtitle(['Evasive searching, iter = ',num2str(i), ', t = ', num2str(t), ', \Delta t = ', num2str(sim.dt), ', \lambda = ', num2str(target.lambda), ', \psi = ', num2str(target.psi), ', a = ', num2str(drones.a*sim.dt), '/\Delta','t, \sigma = ', num2str(drones.sigma),', d = ', num2str(drones.d)], 'FontSize', 16, 'FontName', 'Times');
+    frames(i+1) = getframe(gcf);  
+    %{
+    if(((i==50)||(i==120))||(i==250))
+        sgtitle([]);
+        exportgraphics(gcf,"./Figures/Search/Evasive/evasive_search_rotating_" + num2str(i) + "_tight.eps",'Resolution',300)
+    end
+    %}
+    drawnow;
+
     if(i ~= sim.timesteps)
         delete(plots_1); delete(plots_2);  
     end
@@ -197,7 +215,7 @@ for i=sim.timesteps+1:sim.timesteps+200
     plot4_1 = surf(X_mesh,Y_mesh,reshape(target.p,[N,N]),'EdgeColor','none','FaceAlpha',0.7); 
     subplot(1,2,2);
     plot4_2 = surf(X_mesh,Y_mesh,reshape(target.p,[N,N]),'EdgeColor','none','FaceAlpha',0.7); 
-    sgtitle(['Post-search, iter = ',num2str(i), ', t = ', num2str(t), ', \Delta', 't = ', num2str(sim.dt), ', \lambda = ', num2str(target.lambda)]);
+    sgtitle(['Post-search, iter = ',num2str(i), ', t = ', num2str(t), ', \Delta', 't = ', num2str(sim.dt), ', \lambda = ', num2str(target.lambda)], 'FontSize', 16, 'FontName', 'Times');
     frames(i+1) = getframe(gcf);
     drawnow; 
     if(i ~= sim.timesteps+200)
@@ -206,7 +224,7 @@ for i=sim.timesteps+1:sim.timesteps+200
     t = t + sim.dt; 
 end
 
-%create_video(frames, sim, ['./Figures/Evasive/evasive_search_',title_str,'.mp4']);
+%create_video(frames, sim, ['./Figures/Search/Evasive/evasive_search_',title_str,'.mp4']);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [p,v_x,v_y]=target_gauss(N,x,y,xvbar,P,s,lambda,d_x,d_y)
     v_x = zeros(N,N); v_y =v_x; dim=2;

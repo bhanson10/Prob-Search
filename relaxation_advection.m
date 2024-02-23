@@ -1,44 +1,70 @@
-% Relaxation Advection FDM, 2D 
+% relaxation_advection.m 
+%
 % This code takes a PDF and calculates the relaxation advection using the
 % following formula: D = lambda*I, v(x) = (lambda/p(x))*grad(p(x)). The code then
 % propagates a uniform PDF using the calculated advection and
 % diffusion. Example problems are 2D gaussians and s-order super-gaussians,
 % where the advection is known analytically. Other examples are numerically
 % approximated, via convex/non-convex shapes of datasets and KDE. 
-% By Ben Hanson, May 6 2023
+%
+% By Benjamin L. Hanson, Feb 23 2024
 
-clear; close all; 
+clear; close all; clc; 
+
+IM_TYPE = 1; %0: Paper figure, 1: Presentation Figure
+
 % Gaussian Implementation
-dt = 0.0003; N=51; L=6; d=L/(N-1); x=[-L/2:d:L/2]; y=[-L/2:d:L/2]; d_x = d; d_y = d;
-xvbar=[0; 0]; P =[1 0.4; 0.4 1]; lambda=1; [X_mesh,Y_mesh] = meshgrid(x,y); s = 3; flag=0; % 0: analytical solution
-title_str = "./Figures/Gauss_" + num2str(s)+ "/Gauss_" + num2str(s); 
-[p,v_x,v_y]=gaussian(N,x,y,xvbar,P,lambda,s,d_x,d_y,flag,title_str);
+dt = 0.005; N=51; L=6; d=L/(N-1); x=[-L/2:d:L/2]; y=[-L/2:d:L/2]; d_x = d; d_y = d;
+xvbar=[0; 0]; P =[1 0.4; 0.4 1]; lambda=1; [X_mesh,Y_mesh] = meshgrid(x,y); s = 1; flag=0; % 0: analytical solution
+if(IM_TYPE==1)
+    title_str = "./Figures/Presentation/Gauss_" + num2str(s)+ "/Gauss_" + num2str(s); 
+else
+    title_str = "./Figures/Paper/Gauss_" + num2str(s)+ "/Gauss_" + num2str(s); 
+end
+[p,v_x,v_y]=gaussian(N,x,y,xvbar,P,lambda,s,d_x,d_y,flag,title_str,IM_TYPE);
 
 % Kidney Bean Implementation
 %{
 dt = 0.001; lambda=1; N = 51; Lmin=-1; Lmax = 2.5; d=(Lmax-Lmin)/(N-1); d_x = d; d_y = d;
 x=[Lmin:d:Lmax]; y=[Lmin:d:Lmax]; [X_mesh,Y_mesh] = meshgrid(x,y); flag = 1; % numerical 
-[p,v_x,v_y]=kidney_bean(N,x,y,d,lambda); 
-title_str = "./Figures/Kidney_Bean"; 
+[p,v_x,v_y]=kidney_bean(N,x,y,d,lambda,IM_TYPE); 
+if(IM_TYPE==1)
+    title_str = "./Figures/Presentation/Kidney_Bean"; 
+else
+    title_str = "./Figures/Paper/Kidney_Bean"; 
+end
 %}
 
-%{
 % Numerical Implementation
+%{
 flag = 3; % 1:alpha, 2:KSD Den, 3:KSD Lake
-if(flag==1)
-    load ./Datasets/alpha.mat
-    title_str = "./Figures/Alpha/alpha"; 
-elseif(flag==2)
-    load ./Datasets/kde_den.mat
-    title_str = "./Figures/Den/kde_den"; 
-elseif(flag==3)
-    load ./Datasets/kde_lake.mat
-    title_str = "./Figures/Lake/kde_lake"; 
+if(IM_TYPE==1)
+    if(flag==1)
+        load ./Datasets/alpha.mat
+        title_str = "./Figures/Presentation/Alpha/alpha"; 
+    elseif(flag==2)
+        load ./Datasets/kde_den.mat
+        title_str = "./Figures/Presentation/Den/kde_den"; 
+    elseif(flag==3)
+        load ./Datasets/kde_lake.mat
+        title_str = "./Figures/Presentation/Lake/kde_lake"; 
+    end
+else
+    if(flag==1)
+        load ./Datasets/alpha.mat
+        title_str = "./Figures/Paper/Alpha/alpha"; 
+    elseif(flag==2)
+        load ./Datasets/kde_den.mat
+        title_str = "./Figures/Paper/Den/kde_den"; 
+    elseif(flag==3)
+        load ./Datasets/kde_lake.mat
+        title_str = "./Figures/Paper/Lake/kde_lake"; 
+    end
 end
 dt = 0.001; lambda=1; N = 51; Lmin_x = -1.5; Lmax_x = 1.5; d_x=(Lmax_x-Lmin_x)/(N-1);
 Lmin_y = -2; Lmax_y = 2; d_y=(Lmax_y-Lmin_y)/(N-1); 
 x=[Lmin_x:d_x:Lmax_x]; y=[Lmin_y:d_y:Lmax_y]; [X_mesh,Y_mesh] = meshgrid(x,y); 
-[p,v_x,v_y]=numerical(N,x,y,d_x,d_y,lambda,shp,X_mesh,Y_mesh,flag,title_str);
+[p,v_x,v_y]=numerical(N,x,y,d_x,d_y,lambda,shp,X_mesh,Y_mesh,flag,title_str,IM_TYPE);
 %}
 
 % Propagate a new, different PDF to the relaxation goal PDF using the calculated advection field 
@@ -54,11 +80,12 @@ end
 PDF_U = PDF_U/(d_x*d_y*sum(PDF_U,'all')); 
 
 clear F_iso; clear F_top; 
-figure(5); clf; grid on; hold on; view(30,30); %Iso View
+figure(5); clf;  hold on; view(30,30); %Iso View
+set(gca, 'FontName' , 'Times','FontSize',12);
 title('Initial Uniform PDF');
-xlabel('x', 'Interpreter', 'Latex')
-ylabel('y', 'Interpreter', 'Latex')
-zlabel('Probability', 'Interpreter', 'Latex');
+xlabel('x', 'FontSize', 16, 'FontName', 'Times')
+ylabel('y', 'FontSize', 16, 'FontName', 'Times')
+zlabel('Probability', 'FontSize', 16, 'FontName', 'Times');
 colorbar;
 clim([0 max_val]);
 xlim([x(1), x(end)])
@@ -68,11 +95,12 @@ F_iso(1) = getframe(gcf);
 set( gcf , 'Color' , 'w' );
 drawnow
 
-figure(6); clf; grid on; hold on; view(0,90); %Top View
+figure(6); clf;  hold on; view(0,90); %Top View
+set(gca, 'FontName' , 'Times','FontSize',12);
 title('Initial Uniform PDF');
-xlabel('x', 'Interpreter', 'Latex')
-ylabel('y', 'Interpreter', 'Latex')
-zlabel('Probability', 'Interpreter', 'Latex')
+xlabel('x', 'FontSize', 16, 'FontName', 'Times')
+ylabel('y', 'FontSize', 16, 'FontName', 'Times')
+zlabel('Probability', 'FontSize', 16, 'FontName', 'Times')
 colorbar;
 clim([0 max_val]);
 if(flag==0)
@@ -80,7 +108,11 @@ if(flag==0)
 end
 xlim([x(1), x(end)])
 ylim([y(1), y(end)])
-contour(X_mesh,Y_mesh,reshape(PDF_U,[N,N]),[linspace(0.01,max_val,10)], 'LineWidth',2);
+if(IM_TYPE==1)
+    contour(X_mesh,Y_mesh,reshape(PDF_U,[N,N]),[linspace(0.01,max_val,10)], 'LineWidth',2, 'Fill', 'on');
+else
+    contour(X_mesh,Y_mesh,reshape(PDF_U,[N,N]),[linspace(0.01,max_val,10)], 'LineWidth',2);
+end
 F_top(1) = getframe(gcf); 
 set( gcf , 'Color' , 'w' );
 drawnow
@@ -132,40 +164,41 @@ PDF = reshape(PDF_U, [N*N,1]); p = reshape(p,[N*N,1]);
 eps=sum(abs(p-PDF)); diff = 1; % Initializing Difference to be above 0.01
 
 timestep = 1; timestep_list = [timestep]; eps_list = [eps]; 
-while(timestep < 50)
-%while(diff > 0.01)
+while(diff > 0.01)
   K1=M*PDF;
   K2=M*(PDF+(dt/2)*K1);
   K3=M*(PDF+(dt/2)*K2);
   K4=M*(PDF+dt*K3);
   PDF = PDF+dt*((K1/6)+(K2/3)+(K3/3)+(K4/6));
   PDF = boundary_conditions(PDF,N,d_x,d_y);
-  [eps_new, F1, F2] = plot_PDF(p,PDF,timestep,dt,x,y,X_mesh,Y_mesh,N,max_val,timestep_list,eps_list,flag,title_str); 
+  [eps_new, F1, F2] = plot_PDF(p,PDF,timestep,dt,x,y,X_mesh,Y_mesh,N,max_val,timestep_list,eps_list,flag,title_str,IM_TYPE); 
   F_iso(timestep) = F1; F_top(timestep) = F2;
   timestep=timestep+1; diff = abs(eps-eps_new); eps = eps_new; 
   timestep_list(end+1) = timestep; eps_list(end+1) = eps_new;
 end 
 timestep=timestep-1; 
 
-figure(5); clf; grid on; hold on; view(30,30); %Iso View
+figure(5); clf;  hold on; view(30,30); %Iso View
+set(gca, 'FontName' , 'Times','FontSize',12);
 title([]);
-xlabel('x', 'Interpreter', 'Latex')
-ylabel('y', 'Interpreter', 'Latex')
-zlabel('Probability', 'Interpreter', 'Latex')
+xlabel('x', 'FontSize', 16, 'FontName', 'Times')
+ylabel('y', 'FontSize', 16, 'FontName', 'Times')
+zlabel('Probability', 'FontSize', 16, 'FontName', 'Times')
 colorbar;
 clim([0 max_val]);
 xlim([x(1), x(end)])
 ylim([y(1), y(end)])
 surf(X_mesh,Y_mesh,reshape(PDF,[N,N]), 'EdgeColor','none'); 
-exportgraphics(gca,title_str+'_frame_final_iso.eps','Resolution',300)
+%exportgraphics(gca,title_str+'_frame_final_iso.eps','Resolution',300)
 set( gcf , 'Color' , 'w' );
 drawnow
 
-figure(6); clf; grid on; hold on; view(0,90); %Top View
+figure(6); clf;  hold on; view(0,90); %Top View
+set(gca, 'FontName' , 'Times','FontSize',12);
 title([]);
-xlabel('x', 'Interpreter', 'Latex')
-ylabel('y', 'Interpreter', 'Latex')
-zlabel('Probability', 'Interpreter', 'Latex')
+xlabel('x', 'FontSize', 16, 'FontName', 'Times')
+ylabel('y', 'FontSize', 16, 'FontName', 'Times')
+zlabel('Probability', 'FontSize', 16, 'FontName', 'Times')
 colorbar;
 clim([0 max_val]);
 if(flag==0)
@@ -173,26 +206,32 @@ if(flag==0)
 end
 xlim([x(1), x(end)])
 ylim([y(1), y(end)])
-contour(X_mesh,Y_mesh,reshape(PDF,[N,N]),[linspace(0.01,max_val,10)], 'LineWidth',2);
-exportgraphics(gca,title_str+'_frame_final_top.eps','Resolution',300)
+if(IM_TYPE==1)
+    contour(X_mesh,Y_mesh,reshape(PDF,[N,N]),[linspace(0.01,max_val,10)], 'LineWidth',2, 'Fill', 'on');
+else
+    contour(X_mesh,Y_mesh,reshape(PDF,[N,N]),[linspace(0.01,max_val,10)], 'LineWidth',2);
+end
+
+%exportgraphics(gca,title_str+'_frame_final_top.eps','Resolution',300)
 set( gcf , 'Color' , 'w' );
 drawnow
 
-figure(7); clf; grid on; hold on;
+figure(7); clf;  hold on;
+set(gca, 'FontName' , 'Times','FontSize',12);
 title([char(949), '(t)']);
-xlabel('timestep', 'Interpreter', 'Latex')
-ylabel('$\epsilon$', 'Interpreter', 'Latex')
+xlabel('timestep', 'FontSize', 16, 'FontName', 'Times')
+ylabel('\epsilon', 'FontSize', 16, 'FontName', 'Times')
 xlim([1,inf])
 ylim([0,inf])
 plot(timestep_list, eps_list);
-exportgraphics(gca,title_str+'_epsilon.eps','Resolution',300)
+%exportgraphics(gca,title_str+'_epsilon.eps','Resolution',300)
 set( gcf , 'Color' , 'w' );
 drawnow
     
-create_video(F_top, title_str + '_top_2D.mp4');
-create_video(F_iso, title_str + '_iso_2D.mp4');
+%create_video(F_top, title_str + '_top_2D.mp4');
+%create_video(F_iso, title_str + '_iso_2D.mp4');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [p,v_x,v_y]=gaussian(N,x,y,xvbar,P,lambda,s,d_x,d_y,flag,title_str)
+function [p,v_x,v_y]=gaussian(N,x,y,xvbar,P,lambda,s,d_x,d_y,flag,title_str,IM_TYPE)
 v_x = zeros(N,N); v_y =v_x; dim=2;
 
 B = gamma((dim+2)/(2*s))/(dim*gamma(dim/(2*s)));
@@ -209,10 +248,10 @@ for i=1:N
 end
 p = reshape(p,[N,N]);
 
-make_plots(x,y,p,v_x,v_y,title_str,flag,lambda);
+make_plots(x,y,p,v_x,v_y,title_str,flag,lambda, IM_TYPE);
 end % end function gaussian
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [p,v_x,v_y]=kidney_bean(N,x,y,d,lambda)
+function [p,v_x,v_y]=kidney_bean(N,x,y,d,lambda, IM_TYPE)
 p = zeros(N,N); dt = 0.0005; 
 
 for i=1:N
@@ -263,10 +302,10 @@ v_x = (lambda).*(v_x./p); v_y = (lambda).*(v_y./p);
 v_x(:,1) = 0; v_x(:,end) = 0; v_x(1,:) = 0; v_x(end,:) = 0; 
 v_y(:,1) = 0; v_y(:,end) = 0; v_y(1,:) = 0; v_y(end,:) = 0; 
 
-make_plots(x,y,p,v_x,v_y, "Kidney_Bean",2,lambda);
+make_plots(x,y,p,v_x,v_y, "Kidney_Bean",2,lambda, IM_TYPE);
 end % end function kidney_bean
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [p,v_x,v_y]=numerical(N,x,y,d_x,d_y,lambda,shp,X_mesh,Y_mesh,flag,title_str)
+function [p,v_x,v_y]=numerical(N,x,y,d_x,d_y,lambda,shp,X_mesh,Y_mesh,flag,title_str, IM_TYPE)
 p = zeros(N,N); dt = 0.001;
 
 if(flag==1) % Alpha-convex hull approximation
@@ -363,16 +402,18 @@ elseif(flag==2||flag==3) % KSD Approximation
     v_x = (lambda).*(v_x./p); v_y = (lambda).*(v_y./p);
 end
 
-make_plots(x,y,p,v_x,v_y,title_str,2,lambda);
+make_plots(x,y,p,v_x,v_y,title_str,2,lambda, IM_TYPE);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function make_plots(x,y,p,v_x,v_y,title_str,flag,lambda)
+function make_plots(x,y,p,v_x,v_y,title_str,flag,lambda,IM_TYPE)
     [X_mesh,Y_mesh] = meshgrid(x,y); max_val = max(p, [], 'all');
 
-    figure(1); clf; grid on; hold on; view(0,90); %Top View
-    xlabel('x', 'Interpreter', 'Latex')
-    ylabel('y', 'Interpreter', 'Latex')
-    zlabel('Probability', 'Interpreter', 'Latex')
+    figure(1); clf;  hold on; view(0,90); %Top View
+    set(gca, 'FontName' , 'Times','FontSize',12);
+
+    xlabel('x', 'FontSize', 16, 'FontName', 'Times')
+    ylabel('y', 'FontSize', 16, 'FontName', 'Times')
+    zlabel('Probability', 'FontSize', 16, 'FontName', 'Times')
     colorbar;
     clim([0 max_val]);
     if(flag==0)
@@ -380,27 +421,33 @@ function make_plots(x,y,p,v_x,v_y,title_str,flag,lambda)
     end
     xlim([x(1) x(end)])
     ylim([y(1) y(end)])
-    contour(X_mesh,Y_mesh,p,[linspace(0.01,max_val,10)], 'LineWidth',2);
+    if(IM_TYPE==1)
+        contour(X_mesh,Y_mesh,p,[linspace(0.01,max_val,10)], 'LineWidth',2, 'Fill', 'on');
+    else
+        contour(X_mesh,Y_mesh,p,[linspace(0.01,max_val,10)], 'LineWidth',2);
+    end
     ax = gca;
-    exportgraphics(ax,title_str + '_relax_pdf_top.eps','Resolution',300)
+    %exportgraphics(ax,title_str + '_relax_pdf_top.eps','Resolution',300)
     drawnow
 
-    figure(2); clf; grid on; hold on; view(30,30); %Top View
-    xlabel('x', 'Interpreter', 'Latex')
-    ylabel('y', 'Interpreter', 'Latex')
-    zlabel('Probability', 'Interpreter', 'Latex')
+    figure(2); clf;  hold on; view(30,30); %Top View
+    set(gca, 'FontName' , 'Times','FontSize',12);
+    xlabel('x', 'FontSize', 16, 'FontName', 'Times')
+    ylabel('y', 'FontSize', 16, 'FontName', 'Times')
+    zlabel('Probability', 'FontSize', 16, 'FontName', 'Times')
     colorbar;
     clim([0 max_val]);
     xlim([x(1) x(end)])
     ylim([y(1) y(end)])
     surf(X_mesh,Y_mesh,p,'EdgeColor','none');
     ax = gca;
-    exportgraphics(ax,title_str + '_relax_pdf_iso.eps','Resolution',300)
+    %exportgraphics(ax,title_str + '_relax_pdf_iso.eps','Resolution',300)
     drawnow
 
-    figure(3); clf; grid on; hold on;
-    xlabel('x', 'Interpreter', 'Latex')
-    ylabel('y', 'Interpreter', 'Latex')
+    figure(3); clf;  hold on;
+    set(gca, 'FontName' , 'Times','FontSize',12);
+    xlabel('x', 'FontSize', 16, 'FontName', 'Times')
+    ylabel('y', 'FontSize', 16, 'FontName', 'Times')
     if(flag==0)
         axis equal; 
     end
@@ -408,15 +455,16 @@ function make_plots(x,y,p,v_x,v_y,title_str,flag,lambda)
     ylim([y(1) y(end)])
     quiver(X_mesh,Y_mesh,v_x,v_y)
     ax = gca;
-    exportgraphics(ax,title_str+'_adv.eps','Resolution',300)
+    %exportgraphics(ax,title_str+'_adv.eps','Resolution',300)
     drawnow
 
     phi = lambda*log(p); 
     
-    figure(4); clf; grid on; hold on; view(0,90); %Top View
-    xlabel('x', 'Interpreter', 'Latex')
-    ylabel('y', 'Interpreter', 'Latex')
-    zlabel('Probability', 'Interpreter', 'Latex')
+    figure(4); clf;  hold on; view(0,90); %Top View
+    set(gca, 'FontName' , 'Times','FontSize',12);
+    xlabel('x', 'FontSize', 16, 'FontName', 'Times')
+    ylabel('y', 'FontSize', 16, 'FontName', 'Times')
+    zlabel('Probability', 'FontSize', 16, 'FontName', 'Times')
     if(flag==0)
         axis equal; 
     end
@@ -429,9 +477,13 @@ function make_plots(x,y,p,v_x,v_y,title_str,flag,lambda)
     cmp = flipud(cmp);
     colormap(cmp); 
     colorbar; 
-    contour(X_mesh,Y_mesh,phi,levels, 'LineWidth',2);
+    if(IM_TYPE==1)
+        contour(X_mesh,Y_mesh,phi,levels, 'LineWidth',2, 'Fill', 'on');
+    else
+        contour(X_mesh,Y_mesh,phi,levels, 'LineWidth',2);
+    end
     ax = gca;
-    exportgraphics(ax,title_str + '_relax_phi_top.eps','Resolution',300)
+    %exportgraphics(ax,title_str + '_relax_phi_top.eps','Resolution',300)
     drawnow
 end % end function make_plots
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -449,16 +501,17 @@ function PDF = boundary_conditions(PDF,N,d_x,d_y)
     PDF = PDF/(d_x*d_y*sum(PDF,'all'));
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [eps_new,F1,F2] = plot_PDF(p,PDF,timestep,dt,x,y,X_mesh,Y_mesh,N,max_val,timestep_list,eps_list,flag,title_str)
+function [eps_new,F1,F2] = plot_PDF(p,PDF,timestep,dt,x,y,X_mesh,Y_mesh,N,max_val,timestep_list,eps_list,flag,title_str, IM_TYPE)
  
     eps_new = sum(abs(p - PDF)); 
     PDF_plot = reshape(PDF,[N,N]);
     
-    figure(5); clf; grid on; hold on; view(30,30); %Iso View
+    figure(5); clf;  hold on; view(30,30); %Iso View
+    set(gca, 'FontName' , 'Times','FontSize',12);
     title(['iter = ', num2str(timestep), ', t = ', num2str(timestep*dt), ', \Delta t = ', num2str(dt), ', ', char(949), ' = ', num2str(eps_new)]);
-    xlabel('x', 'Interpreter', 'Latex')
-    ylabel('y', 'Interpreter', 'Latex')
-    zlabel('Probability', 'Interpreter', 'Latex')
+    xlabel('x', 'FontSize', 16, 'FontName', 'Times')
+    ylabel('y', 'FontSize', 16, 'FontName', 'Times')
+    zlabel('Probability', 'FontSize', 16, 'FontName', 'Times')
     colorbar;
     clim([0 max_val]);
     xlim([x(1), x(end)])
@@ -467,16 +520,17 @@ function [eps_new,F1,F2] = plot_PDF(p,PDF,timestep,dt,x,y,X_mesh,Y_mesh,N,max_va
     F1 = getframe(gcf);
     if (mod(timestep,50)==0)
         title([]);
-        exportgraphics(gca,title_str+'_frame_'+num2str(timestep)+'_iso.eps','Resolution',300)
+        %exportgraphics(gca,title_str+'_frame_'+num2str(timestep)+'_iso.eps','Resolution',300)
     end
     set( gcf , 'Color' , 'w' );
     drawnow
 
-    figure(6); clf; grid on; hold on; view(0,90); %Top View
+    figure(6); clf;  hold on; view(0,90); %Top View
+    set(gca, 'FontName' , 'Times','FontSize',12);
     title(['iter = ', num2str(timestep), ', t = ', num2str(timestep*dt), ', \Delta t = ', num2str(dt), ', ', char(949), ' = ', num2str(eps_new)]);
-    xlabel('x', 'Interpreter', 'Latex')
-    ylabel('y', 'Interpreter', 'Latex')
-    zlabel('Probability', 'Interpreter', 'Latex')
+    xlabel('x', 'FontSize', 16, 'FontName', 'Times')
+    ylabel('y', 'FontSize', 16, 'FontName', 'Times')
+    zlabel('Probability', 'FontSize', 16, 'FontName', 'Times')
     colorbar;
     clim([0 max_val]);
     if(flag==0)
@@ -484,19 +538,24 @@ function [eps_new,F1,F2] = plot_PDF(p,PDF,timestep,dt,x,y,X_mesh,Y_mesh,N,max_va
     end
     xlim([x(1), x(end)])
     ylim([y(1), y(end)])
-    contour(X_mesh,Y_mesh,PDF_plot,[linspace(0.01,max_val,10)], 'LineWidth',2);
+    if(IM_TYPE==1)
+        contour(X_mesh,Y_mesh,PDF_plot,[linspace(0.01,max_val,10)], 'LineWidth',2, 'Fill', 'on');
+    else
+        contour(X_mesh,Y_mesh,PDF_plot,[linspace(0.01,max_val,10)], 'LineWidth',2);
+    end
     F2 = getframe(gcf);
     if (mod(timestep,50)==0)
         title([]);
-        exportgraphics(gca,title_str+'_frame_'+num2str(timestep)+'_top.eps','Resolution',300)
+        %exportgraphics(gca,title_str+'_frame_'+num2str(timestep)+'_top.eps','Resolution',300)
     end
     set( gcf , 'Color' , 'w' );
     drawnow
 
-    figure(7); clf; grid on; hold on;
+    figure(7); clf;  hold on;
+    set(gca, 'FontName' , 'Times','FontSize',12);
     title([char(949), '(t)']);
-    xlabel('timestep', 'Interpreter', 'Latex')
-    ylabel('$\epsilon$', 'Interpreter', 'Latex')
+    xlabel('timestep', 'FontSize', 16, 'FontName', 'Times')
+    ylabel('\epsilon', 'FontSize', 16, 'FontName', 'Times')
     xlim([1,inf])
     ylim([0,inf])
     plot(timestep_list, eps_list);
