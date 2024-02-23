@@ -3,7 +3,7 @@
 % This code takes a PDF and calculates the relaxation advection using the
 % following formula: D = lambda*I, v(x) = (lambda/p(x))*grad(p(x)). The code then
 % propagates a uniform PDF using the calculated advection and
-% diffusion. Example problems are 2D gaussians and s-order super-gaussians,
+% diffusion. Example problems are 2D gaussians and beta-order super-gaussians,
 % where the advection is known analytically. Other examples are numerically
 % approximated, via convex/non-convex shapes of datasets and KDE. 
 %
@@ -15,13 +15,13 @@ IM_TYPE = 1; %0: Paper figure, 1: Presentation Figure
 
 % Gaussian Implementation
 dt = 0.005; N=51; L=6; d=L/(N-1); x=[-L/2:d:L/2]; y=[-L/2:d:L/2]; d_x = d; d_y = d;
-xvbar=[0; 0]; P =[1 0.4; 0.4 1]; lambda=1; [X_mesh,Y_mesh] = meshgrid(x,y); s = 1; flag=0; % 0: analytical solution
+xvbar=[0; 0]; Sigma =[1 0.4; 0.4 1]; lambda=1; [X_mesh,Y_mesh] = meshgrid(x,y); beta = 2; flag=0; % 0: analytical solution
 if(IM_TYPE==1)
-    title_str = "./Figures/Presentation/Gauss_" + num2str(s)+ "/Gauss_" + num2str(s); 
+    title_str = "./Figures/Presentation/Gauss_" + num2str(beta)+ "/Gauss_" + num2str(beta); 
 else
-    title_str = "./Figures/Paper/Gauss_" + num2str(s)+ "/Gauss_" + num2str(s); 
+    title_str = "./Figures/Paper/Gauss_" + num2str(beta)+ "/Gauss_" + num2str(beta); 
 end
-[p,v_x,v_y]=gaussian(N,x,y,xvbar,P,lambda,s,d_x,d_y,flag,title_str,IM_TYPE);
+[p,v_x,v_y]=gaussian(N,x,y,xvbar,Sigma,lambda,beta,d_x,d_y,flag,title_str,IM_TYPE);
 
 % Kidney Bean Implementation
 %{
@@ -81,7 +81,7 @@ PDF_U = PDF_U/(d_x*d_y*sum(PDF_U,'all'));
 
 clear F_iso; clear F_top; 
 figure(5); clf;  hold on; view(30,30); %Iso View
-set(gca, 'FontName' , 'Times','FontSize',12);
+set(gca, 'FontName' , 'Times','FontSize',16);
 title('Initial Uniform PDF');
 xlabel('x', 'FontSize', 16, 'FontName', 'Times')
 ylabel('y', 'FontSize', 16, 'FontName', 'Times')
@@ -96,7 +96,7 @@ set( gcf , 'Color' , 'w' );
 drawnow
 
 figure(6); clf;  hold on; view(0,90); %Top View
-set(gca, 'FontName' , 'Times','FontSize',12);
+set(gca, 'FontName' , 'Times','FontSize',16);
 title('Initial Uniform PDF');
 xlabel('x', 'FontSize', 16, 'FontName', 'Times')
 ylabel('y', 'FontSize', 16, 'FontName', 'Times')
@@ -179,7 +179,7 @@ end
 timestep=timestep-1; 
 
 figure(5); clf;  hold on; view(30,30); %Iso View
-set(gca, 'FontName' , 'Times','FontSize',12);
+set(gca, 'FontName' , 'Times','FontSize',16);
 title([]);
 xlabel('x', 'FontSize', 16, 'FontName', 'Times')
 ylabel('y', 'FontSize', 16, 'FontName', 'Times')
@@ -194,7 +194,7 @@ set( gcf , 'Color' , 'w' );
 drawnow
 
 figure(6); clf;  hold on; view(0,90); %Top View
-set(gca, 'FontName' , 'Times','FontSize',12);
+set(gca, 'FontName' , 'Times','FontSize',16);
 title([]);
 xlabel('x', 'FontSize', 16, 'FontName', 'Times')
 ylabel('y', 'FontSize', 16, 'FontName', 'Times')
@@ -217,7 +217,7 @@ set( gcf , 'Color' , 'w' );
 drawnow
 
 figure(7); clf;  hold on;
-set(gca, 'FontName' , 'Times','FontSize',12);
+set(gca, 'FontName' , 'Times','FontSize',16);
 title([char(949), '(t)']);
 xlabel('timestep', 'FontSize', 16, 'FontName', 'Times')
 ylabel('\epsilon', 'FontSize', 16, 'FontName', 'Times')
@@ -231,18 +231,17 @@ drawnow
 %create_video(F_top, title_str + '_top_2D.mp4');
 %create_video(F_iso, title_str + '_iso_2D.mp4');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [p,v_x,v_y]=gaussian(N,x,y,xvbar,P,lambda,s,d_x,d_y,flag,title_str,IM_TYPE)
+function [p,v_x,v_y]=gaussian(N,x,y,xvbar,Sigma,lambda,beta,d_x,d_y,flag,title_str,IM_TYPE)
 v_x = zeros(N,N); v_y =v_x; dim=2;
 
-B = gamma((dim+2)/(2*s))/(dim*gamma(dim/(2*s)));
-C = 2^(dim/2)*gamma(dim/2); 
-A = C*((s*B^(dim/2))/(gamma(dim/(2*s))))*(((2*pi)^dim)*det(P))^(-1/2);
+B = gamma((dim+2)/(2*beta))/(dim*gamma(dim/(2*beta)));
+A = (B/pi)^(dim/2)*(gamma(dim/2)*beta)/(gamma(dim/(2*beta))*det(Sigma)^(-1/2));
 
 for i=1:N
     for j=1:N
         xv=[x(i); y(j)];
-        p(j,i) = A*exp(-(B*(xv-xvbar)'*inv(P)*(xv-xvbar))^s);
-        v = (-2*lambda*s)*B*(B*(xv-xvbar)'*inv(P)*(xv-xvbar))^(s-1)*inv(P)*(xv-xvbar);  
+        p(j,i) = A*exp(-(B*(xv-xvbar)'*inv(Sigma)*(xv-xvbar))^beta);
+        v = (-2*lambda*beta)*B*(B*(xv-xvbar)'*inv(Sigma)*(xv-xvbar))^(beta-1)*inv(Sigma)*(xv-xvbar);  
         v_x(j,i) = v(1,1); v_y(j,i) = v(2,1); 
     end
 end

@@ -26,7 +26,7 @@ target.lambda = 2; target.dif = target.lambda*ones(N+2); target.psi = 1e-1;
 target.stats_flag = 1; %1: Gaussian Statistics, 2: Numerical Territory
 if(target.stats_flag == 1)
     target.s = 1; 
-    target.xvbar=[0; 0]; target.P = [3 0; 0 3];
+    target.xvbar=[0; 0]; target.Sigma = [3 0; 0 3];
 else
     flag = 1; % 1:alpha, 2:KSD Den, 3:KSD Lake
     if(flag==1)
@@ -75,14 +75,14 @@ elseif (drones.orbit_flag == 4)
 end
 
 if(target.stats_flag == 1)
-    drones.sigma = 0.1;  drones.P = [.25 0; 0 .25]; 
+    drones.sigma = 0.1;  drones.Sigma = [.25 0; 0 .25]; 
 else
-    drones.sigma = 0.1; drones.P = [1 0; 0 1]; 
+    drones.sigma = 0.1; drones.Sigma = [1 0; 0 1]; 
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% Drone Constants %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Initial Target Density/Relaxation Advection
 if(target.stats_flag == 1)
-    [target.p,target.v_x,target.v_y]=target_gauss(N,x,y,target.xvbar,target.P,target.s,target.lambda,d_x,d_y);
+    [target.p,target.v_x,target.v_y]=target_gauss(N,x,y,target.xvbar,target.Sigma,target.s,target.lambda,d_x,d_y);
 else
     [target.p,target.v_x,target.v_y]=target_numer(N,x,y,d_x,d_y,target.lambda,shp,X_mesh,Y_mesh,flag);
 end
@@ -226,18 +226,17 @@ end
 
 %create_video(frames, sim, ['./Figures/Search/Evasive/evasive_search_',title_str,'.mp4']);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [p,v_x,v_y]=target_gauss(N,x,y,xvbar,P,s,lambda,d_x,d_y)
+function [p,v_x,v_y]=target_gauss(N,x,y,xvbar,Sigma,s,lambda,d_x,d_y)
     v_x = zeros(N,N); v_y =v_x; dim=2;
     
-    B = gamma((dim+2)/(2*s))/(dim*gamma(dim/(2*s)));
-    C = 2^(dim/2)*gamma(dim/2); 
-    A = C*((s*B^(dim/2))/(gamma(dim/(2*s))))*(((2*pi)^dim)*det(P))^(-1/2);
+    B = gamma((dim+2)/(2*beta))/(dim*gamma(dim/(2*beta)));
+    A = (B/pi)^(dim/2)*(gamma(dim/2)*beta)/(gamma(dim/(2*beta))*det(Sigma)^(-1/2));
     
     for i=1:N
         for j=1:N
             xv=[x(i); y(j)];
-            p(j,i) = A*exp(-(B*(xv-xvbar)'*inv(P)*(xv-xvbar))^s);
-            v = (-2*lambda*s)*B*(B*(xv-xvbar)'*inv(P)*(xv-xvbar))^(s-1)*inv(P)*(xv-xvbar);  
+            p(j,i) = A*exp(-(B*(xv-xvbar)'*inv(Sigma)*(xv-xvbar))^s);
+            v = (-2*lambda*s)*B*(B*(xv-xvbar)'*inv(Sigma)*(xv-xvbar))^(s-1)*inv(Sigma)*(xv-xvbar);  
             v_x(j,i) = v(1,1); v_y(j,i) = v(2,1); 
         end
     end
@@ -475,15 +474,15 @@ function [tot_v_x, tot_v_y] = update_vel(drones, x, y, N, target)
     
     B = gamma((dim+2)/(2*s))/(dim*gamma(dim/(2*s)));
     C = 2^(dim/2)*gamma(dim/2); 
-    A = C*((s*B^(dim/2))/(gamma(dim/(2*s))))*(((2*pi)^dim)*det(drones.P))^(-1/2);
+    A = C*((s*B^(dim/2))/(gamma(dim/(2*s))))*(((2*pi)^dim)*det(drones.Sigma))^(-1/2);
     
     for k=1:drones.num
         grad_p_x = zeros(N,N); grad_p_y = grad_p_x;
         for i=2:N+1
             for j=2:N+1
                 xv=[x(i-1); y(j-1)]; q = [drones.pos(k,1); drones.pos(k,2)]; 
-                p = A*exp(-(B*(xv-q)'*inv(drones.P)*(xv-q))^s);
-                grad_p = -2*s*p*B*(B*(xv-q)'*inv(drones.P)*(xv-q))^(s-1)*inv(drones.P)*(xv-q);  
+                p = A*exp(-(B*(xv-q)'*inv(drones.Sigma)*(xv-q))^s);
+                grad_p = -2*s*p*B*(B*(xv-q)'*inv(drones.Sigma)*(xv-q))^(s-1)*inv(drones.Sigma)*(xv-q);  
                 grad_p_x(j-1,i-1) = grad_p(1,1); grad_p_y(j-1,i-1) = grad_p(2,1); 
             end
         end
@@ -497,14 +496,14 @@ function dif = update_dif(drones, x, y, N)
     
     B = gamma((dim+2)/(2*s))/(dim*gamma(dim/(2*s)));
     C = 2^(dim/2)*gamma(dim/2); 
-    A = C*((s*B^(dim/2))/(gamma(dim/(2*s))))*(((2*pi)^dim)*det(drones.P))^(-1/2);
+    A = C*((s*B^(dim/2))/(gamma(dim/(2*s))))*(((2*pi)^dim)*det(drones.Sigma))^(-1/2);
     
     for k=1:drones.num
         p = zeros(N,N);
         for i=1:N
             for j=1:N
                 xv=[x(i); y(j)]; q = [drones.pos(k,1); drones.pos(k,2)]; 
-                p(j,i) = A*exp(-(B*(xv-q)'*inv(drones.P)*(xv-q))^s);
+                p(j,i) = A*exp(-(B*(xv-q)'*inv(drones.Sigma)*(xv-q))^s);
             end
         end
         dif = dif + p;  

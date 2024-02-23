@@ -25,8 +25,8 @@ colors = ['g' 'b' 'r' 'y' 'm' 'c' 'k'];
 target.lambda = 0.25; 
 target.stats_flag = 2; %1: Gaussian Statistics, 2: Numerical Territory
 if(target.stats_flag == 1)
-    target.s = 2; 
-    target.xvbar=[0; 0]; target.P = [2 0.8; 0.8 2];
+    target.beta = 2; 
+    target.xvbar=[0; 0]; target.Sigma = [2 0.8; 0.8 2];
 else
     flag = 1; % 1:alpha, 2:KSD Den, 3:KSD Lake
     if(flag==1)
@@ -65,13 +65,13 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% Drone Constants %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Initial Target Density/Relaxation Advection
 if(target.stats_flag == 1)
-    [target.p,target.v_x,target.v_y]=target_gauss(N,x,y,target.xvbar,target.P,target.s,target.lambda,d_x,d_y);
+    [target.p,target.v_x,target.v_y]=target_gauss(N,x,y,target.xvbar,target.Sigma,target.beta,target.lambda,d_x,d_y);
 else
     [target.p,target.v_x,target.v_y]=target_numer(N,x,y,d_x,d_y,target.lambda,shp,X_mesh,Y_mesh,flag);
 end
 
 fig = figure(1); clf; hold on; fig.Position = [150 150 1200 600];
-sgtitle(['Pre-search, iter = 0, t = 0, \Delta', 't = ', num2str(sim.dt), ', \lambda = ', num2str(target.lambda)]);
+sgtitle(['Pre-search, iter = 0, t = 0, \Delta', 't = ', num2str(sim.dt), ', \lambda = ', num2str(target.lambda)], 'FontSize', 16, 'FontName', 'Times');
 
 subplot(1,2,1); hold on; 
 xlabel('x','FontSize',16,'Interpreter','latex');
@@ -192,18 +192,17 @@ end
 
 %create_video(frames, sim, ['./Figures/Non-evasive/non-evasive_search_',num2str(target.lambda),'.mp4']);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [p,v_x,v_y]=target_gauss(N,x,y,xvbar,P,s,lambda,d_x,d_y)
+function [p,v_x,v_y]=target_gauss(N,x,y,xvbar,Sigma,beta,lambda,d_x,d_y)
     v_x = zeros(N,N); v_y =v_x; dim=2;
     
-    B = gamma((dim+2)/(2*s))/(dim*gamma(dim/(2*s)));
-    C = 2^(dim/2)*gamma(dim/2); 
-    A = C*((s*B^(dim/2))/(gamma(dim/(2*s))))*(((2*pi)^dim)*det(P))^(-1/2);
+    B = gamma((dim+2)/(2*beta))/(dim*gamma(dim/(2*beta)));
+    A = (B/pi)^(dim/2)*(gamma(dim/2)*beta)/(gamma(dim/(2*beta))*det(Sigma)^(-1/2));
     
     for i=1:N
         for j=1:N
             xv=[x(i); y(j)];
-            p(j,i) = A*exp(-(B*(xv-xvbar)'*inv(P)*(xv-xvbar))^s);
-            v = (-2*lambda*s)*B*(B*(xv-xvbar)'*inv(P)*(xv-xvbar))^(s-1)*inv(P)*(xv-xvbar);  
+            p(j,i) = A*exp(-(B*(xv-xvbar)'*inv(Sigma)*(xv-xvbar))^beta);
+            v = (-2*lambda*beta)*B*(B*(xv-xvbar)'*inv(Sigma)*(xv-xvbar))^(beta-1)*inv(Sigma)*(xv-xvbar);  
             v_x(j,i) = v(1,1); v_y(j,i) = v(2,1); 
         end
     end
