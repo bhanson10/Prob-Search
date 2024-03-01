@@ -7,7 +7,7 @@
 % where the advection is known analytically. Other examples are numerically
 % approximated, via convex/non-convex shapes of datasets and KDE. 
 %
-% By Benjamin L. Hanson, Feb 23 2024
+% By Benjamin L. Hanson, 2024
 
 clear all; close all; clc; 
 

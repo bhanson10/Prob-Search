@@ -1,3 +1,13 @@
+% GGDAF_2D_demo.m 
+%
+% This code plots three 2D Generalized Gaussian Distributions with Anisotropic
+% Flatness, one where the shaping parameter is the same along the
+% eigenvectors, and the other two where the shaping parameter is different.
+% It also demonstrates that the area under the curve, and first and second
+% central moments are as expected.
+%
+% By Benjamin L. Hanson, 2024
+
 clear all; clc; close all; 
 
 mu1 = 0; mu2 = 0; mu3 = 0; p.mu = [mu1; mu2; mu3]; 

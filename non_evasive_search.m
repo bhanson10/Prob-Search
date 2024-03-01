@@ -6,7 +6,7 @@
 % simulation. The behavior of the target in this simulation is assumed to
 % be non-evasive.
 %
-% By Benjamin L. Hanson, Feb 23 2024
+% By Benjamin L. Hanson, 2024
 
 clear all; close; clc; 
 

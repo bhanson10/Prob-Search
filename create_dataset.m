@@ -4,7 +4,7 @@
 % datasets to be used by the relaxation_advection, and (non)evasive search
 % codes. 
 %
-% By Benjamin L. Hanson, Feb 23 2024
+% By Benjamin L. Hanson, 2024
 
 n=50000;
 x1=2*rand(n,1)-1; y1=2*rand(n,1)+x1.*x1-1.5;
