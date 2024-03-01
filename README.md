@@ -77,7 +77,7 @@ The simulation generates the initial PDF chosen as well as the orbits of the sea
 ## kurtosis.m
 The code plots the kurtosis of the GGD $\gamma_2(\beta)$. Demonstrated by the code is that the kurtosis of the GGD aligns with the Gaussian distribution ($\gamma_2(1)=0$), the Laplacian distribution ($\gamma_2(0.5)=3$), and the uniform distribution ($\gamma_2(\beta\rightarrow\infty)\rightarrow -1.2$). We also see that ($\gamma_2(\beta\rightarrow 0)\rightarrow \infty$). This code creates Figure 6 in the paper. 
 
-## GGDAF.m
-Here we demonstrate the GGDAF formulation with three different conditions, one where $\beta_i=\beta_j=\beta$, and two where this is not the case. Note that this formulation works even when $\Sigma$ is not diagonal. This code creates Figure 7 in the paper. 
+## GGDAF_<i>d</i>D_demo.m
+Included in the code base are the 2D and 3D demonstrations of the GGDAF. For the 2D demo, we demonstrate three case, one where the shaping parameters are equal along the eigenvectors, and two others where the shaping parameters are different. We numerically calculate the 0th, 1st, and 2nd order moments to demonstrate that coefficients $\Tilde{A}$ and $\Tilde{B}$ are constrained such that the definitions of the central moments in the Gaussian distribution still hold. In the 3D demo, we demonstrate a single case where two of the shaping parameters $\beta_y$ and $\beta_z$ are the same, and $\beta_x$ is different. We see from the figure created that the $yz$-plane has elliptical isocontours, as is to be expected, whereas the other two perpendicular planes have non-elliptical isocontours, due to the anisotropic flatness. Again, we numerically calculate the 0th, 1st, and 2nd order moments of the 3D GGDAF. Feel free to change the statistics of distributions to get a better understanding of the flexibility of the formulation. 
 
 For further information about code usage, please contact blhanson@ucsd.edu
