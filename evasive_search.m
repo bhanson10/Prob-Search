@@ -230,7 +230,7 @@ function [p,v_x,v_y]=target_gauss(N,x,y,xvbar,Sigma,s,lambda,d_x,d_y)
     v_x = zeros(N,N); v_y =v_x; dim=2;
     
     B = gamma((dim+2)/(2*beta))/(dim*gamma(dim/(2*beta)));
-    A = (B/pi)^(dim/2)*(gamma(dim/2)*beta)/(gamma(dim/(2*beta))*det(Sigma)^(-1/2));
+    A = (B/pi)^(dim/2)*(gamma(dim/2)*beta)/(gamma(dim/(2*beta))*det(Sigma)^(1/2));
     
     for i=1:N
         for j=1:N
