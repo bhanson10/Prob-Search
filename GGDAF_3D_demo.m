@@ -15,7 +15,7 @@ sigma1 = 1; sigma2 = 1; sigma3 = 1; p.Sigma = [sigma1^2 0 0; 0 sigma2^2 0; 0 0 s
 p.b = 1; p.bt = [2 1 1]; 
 
 dx = 0.1; dy = 0.1; dz = 0.1;
-x = -4:dx:4; y = -4:dy:4; z = -4:dy:4;
+x = -5:dx:5; y = -5:dy:5; z = -5:dy:5;
 [X,Y,Z] = meshgrid(x,y,z);
 s = size(X); P1 = NaN(s); P2 = NaN(s); row = s(1); col = s(2); lay = s(3);
 for i = 1:row
