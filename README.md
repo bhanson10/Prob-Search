@@ -50,7 +50,6 @@ The non-evasive search code demonstrates how the relaxation advection can be use
 &ensp; &ensp; - _.num_: number of search vehicles <br>
 &ensp; &ensp; - _.ang_speed_: andgular speed of each search vehicle <br>
 &ensp; &ensp; - _.init_theta_: initial starting position of each search vehicle <br>
-&ensp; &ensp; - _.d_: disruptivity of each drone (see paper) <br>
 &ensp; &ensp; - _.orbit_flag_: flag that dictates which orbit path is taken <br>
 &ensp; &ensp; &ensp; &ensp; * _orbit_flag_$==1$: Concentric circles where radius can be varied <br>
 &ensp; &ensp; &ensp; &ensp; * _orbit_flag_$==2$: Cassini ovals with tunable parameters <br>
@@ -64,13 +63,13 @@ The simulation generates the initial PDF chosen as well as the orbits of the sea
 The evasive search code demonstrates how the relaxation advection can be used to demonstrate the rate of change of confidence in observations searching for a stationary target in a ROI. For the evasive target, we assume that the magnitude and direction of the target is impacted by the locations of the search vehicles, and that the target's velocity will point away from the center of the search vehicle. If the search vehicle is closer by, the magnitude of the velocity will be higher, and the random motion will be more sporadic. The evasive velocity is modeled as the negative gradient of a super-Gaussian with $\beta=0.6$ (so as to avoid increasingly larger velocities if the search vehicle and the target share the same location) and the diffusion is modeled as the superposition of super-Gaussians placed at the locations of the search vehicles. In the background of the total advection field is the relaxation advection, such that there is still a desire to return to the general ROI, though it is scaled so as to not be overbearing. 
 
 ### Tunable Target Constansts (not already stated)
-&ensp; &ensp; - _.psi_: skittishness of target (see paper) <br>
-
+&ensp; &ensp; - _.psi_: agitation of target (see paper) <br>
+&ensp; &ensp; - _.delta_: evasiveness of target (see paper) <br>
 
 ### Tunable Drone/Search vehicle Constansts (not already stated)
 &ensp; &ensp; &ensp; &ensp; * _orbit_flag_$==4$: Rotating, "herding" Cassini ovals, preferable orbit family for evasive search (see paper) <br>
 &ensp; &ensp; - _.sigma_: width of field-of-view of observations of search vehicle <br>
-&ensp; &ensp; - _.P_: covariance of super-Gaussian used for determining advection and diffusion <br>
+&ensp; &ensp; - _.Sigma_: covariance of super-Gaussian used for determining advection and diffusion <br>
 
 The simulation generates the initial PDF chosen as well as the orbits of the search vehicles, then demonstrates how the PDF changes as the observations drive the probabilty down and the advection field drives the proabability around depending on the location of the drones as well as the steady-state. An apparent herding effect is demonstrated when using the "herding" orbit path, as is the goal for evasive target searching. <br> <br>
 
