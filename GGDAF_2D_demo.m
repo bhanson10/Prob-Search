@@ -10,7 +10,7 @@
 
 clear all; close all; clc;
 
-mu1 = 0; mu2 = 0; mu = [mu1; mu2]; sigma1 = 1; sigma2 = 1; Sigma = [sigma1^2 0; 0 sigma2^2];
+mu1 = 0; mu2 = 0; mu = [mu1; mu2]; sigma1 = 1; sigma2 = 1; Sigma = [sigma1^2 0.4; 0.4 sigma2^2];
 b1 = [2 2]; b2 = [1 3]; b3 = [2 0.5]; 
 
 dx = 0.01; dy = 0.01;
