@@ -22,10 +22,10 @@ colors = ['g' 'b' 'r' 'k' 'm' 'c' 'y'];
 %%%%%%%%%%%%%%%%%%%%%%%%%% Simulation Constants %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% Target Constants %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-target.lambda = 2; target.dif = target.lambda*ones(N+2); target.psi = 1e-1; 
+target.lambda = 2; target.dif = target.lambda*ones(N+2); target.psi = 1e-1; target.delta = 8;
 target.stats_flag = 1; %1: Gaussian Statistics, 2: Numerical Territory
 if(target.stats_flag == 1)
-    target.s = 1; 
+    target.beta = 1; 
     target.xvbar=[0; 0]; target.Sigma = [3 0; 0 3];
 else
     flag = 1; % 1:alpha, 2:KSD Den, 3:KSD Lake
@@ -46,7 +46,7 @@ end
 drones.num = 3; 
 drones.ang_speed = [5 5 5]; 
 drones.init_theta = [0 2*pi/3 4*pi/3];
-drones.a = 1/sim.dt; drones.d = 8;
+drones.a = 1/sim.dt; 
 
 drones.orbit_flag = 4; %1: Concentric orbits, 2: Cassini ovals, 3: Lemniscates, 4: Rotating Cassini
 if (drones.orbit_flag == 1)
@@ -59,7 +59,7 @@ elseif (drones.orbit_flag == 2)
 elseif (drones.orbit_flag == 3)
     drones.phi = pi.*([1:drones.num]-1)./drones.num; 
     drones.c = cos(drones.phi); 
-    drones.s = sin(drones.phi); 
+    drones.beta = sin(drones.phi); 
     drones.f = 1/(2*drones.num);
     drones.Xm = cos(theta); drones.Ym = drones.f*sin(2.*theta); 
     drones.scale = 1.4; 
@@ -82,7 +82,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% Drone Constants %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Initial Target Density/Relaxation Advection
 if(target.stats_flag == 1)
-    [target.p,target.v_x,target.v_y]=target_gauss(N,x,y,target.xvbar,target.Sigma,target.s,target.lambda,d_x,d_y);
+    [target.p,target.v_x,target.v_y]=target_gauss(N,x,y,target.xvbar,target.Sigma,target.beta,target.lambda,d_x,d_y);
 else
     [target.p,target.v_x,target.v_y]=target_numer(N,x,y,d_x,d_y,target.lambda,shp,X_mesh,Y_mesh,flag);
 end
@@ -130,11 +130,11 @@ for i=1:drones.num
         drones.pos(i,1) = sqrt(drones.focal^2*cos(2.*drones.init_theta(i))+sqrt(drones.focal^4*(cos(2.*drones.init_theta(i)).^2+drones.b(i)^4-drones.focal^4))).*cos(drones.init_theta(i)); 
         drones.pos(i,2) = drones.f.*sqrt(drones.focal^2*cos(2.*drones.init_theta(i))+sqrt(drones.focal^4*(cos(2.*drones.init_theta(i)).^2+drones.b(i)^4-drones.focal^4))).*sin(drones.init_theta(i));
     elseif(drones.orbit_flag == 3)
-        x_orbit = drones.scale.*(drones.c(i).*drones.Xm - drones.s(i).*drones.Ym); 
-        y_orbit = drones.scale.*(drones.s(i).*drones.Xm + drones.c(i).*drones.Ym);
+        x_orbit = drones.scale.*(drones.c(i).*drones.Xm - drones.beta(i).*drones.Ym); 
+        y_orbit = drones.scale.*(drones.beta(i).*drones.Xm + drones.c(i).*drones.Ym);
         Xm = cos(drones.init_theta(i)); Ym = drones.f*sin(2*drones.init_theta(i));
-        drones.pos(i,1) = drones.scale.*(drones.c(i)*Xm - drones.s(i)*Ym); 
-        drones.pos(i,2) = drones.scale.*(drones.s(i)*Xm + drones.c(i)*Ym); 
+        drones.pos(i,1) = drones.scale.*(drones.c(i)*Xm - drones.beta(i)*Ym); 
+        drones.pos(i,2) = drones.scale.*(drones.beta(i)*Xm + drones.c(i)*Ym); 
     elseif(drones.orbit_flag == 4)
          b=(-2*drones.A(i)^2).*cos(4.*(theta + drones.init_theta(i))); c=drones.A(i)^4-drones.B(i)^4; r=sqrt((-b+sqrt(b.^2-4*c))/2);
          x_orbit = r.*sin((theta + drones.init_theta(i))+(theta).*drones.v);
@@ -186,7 +186,7 @@ for i=1:sim.timesteps
     subplot(1,2,2); 
     plots_2(1) = surf(X_mesh,Y_mesh,reshape(target.p,[N,N]),'EdgeColor','none','FaceAlpha',0.7); 
     
-    sgtitle(['Evasive searching, iter = ',num2str(i), ', t = ', num2str(t), ', \Delta t = ', num2str(sim.dt), ', \lambda = ', num2str(target.lambda), ', \psi = ', num2str(target.psi), ', a = ', num2str(drones.a*sim.dt), '/\Delta','t, \sigma = ', num2str(drones.sigma),', d = ', num2str(drones.d)], 'FontSize', 16, 'FontName', 'Times');
+    sgtitle(['Evasive searching, iter = ',num2str(i), ', t = ', num2str(t), ', \Delta t = ', num2str(sim.dt), ', \lambda = ', num2str(target.lambda), ', \psi = ', num2str(target.psi), ', a = ', num2str(drones.a*sim.dt), '/\Delta','t, \sigma = ', num2str(drones.sigma),', d = ', num2str(target.delta)], 'FontSize', 16, 'FontName', 'Times');
     frames(i+1) = getframe(gcf);  
     %{
     if(((i==50)||(i==120))||(i==250))
@@ -226,7 +226,7 @@ end
 
 %create_video(frames, sim, ['./Figures/Search/Evasive/evasive_search_',title_str,'.mp4']);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [p,v_x,v_y]=target_gauss(N,x,y,xvbar,Sigma,s,lambda,d_x,d_y)
+function [p,v_x,v_y]=target_gauss(N,x,y,xvbar,Sigma,beta,lambda,d_x,d_y)
     v_x = zeros(N,N); v_y =v_x; dim=2;
     
     B = gamma((dim+2)/(2*beta))/(dim*gamma(dim/(2*beta)));
@@ -235,8 +235,8 @@ function [p,v_x,v_y]=target_gauss(N,x,y,xvbar,Sigma,s,lambda,d_x,d_y)
     for i=1:N
         for j=1:N
             xv=[x(i); y(j)];
-            p(j,i) = A*exp(-(B*(xv-xvbar)'*inv(Sigma)*(xv-xvbar))^s);
-            v = (-2*lambda*s)*B*(B*(xv-xvbar)'*inv(Sigma)*(xv-xvbar))^(s-1)*inv(Sigma)*(xv-xvbar);  
+            p(j,i) = A*exp(-(B*(xv-xvbar)'*inv(Sigma)*(xv-xvbar))^beta);
+            v = (-2*lambda*beta)*B*(B*(xv-xvbar)'*inv(Sigma)*(xv-xvbar))^(beta-1)*inv(Sigma)*(xv-xvbar);  
             v_x(j,i) = v(1,1); v_y(j,i) = v(2,1); 
         end
     end
@@ -456,8 +456,8 @@ function drones = update_pos(drones, t)
     elseif(drones.orbit_flag==3)
         for j=1:drones.num
             Xm = cos(drones.ang_speed(j)*t+drones.init_theta(j)); Ym = drones.f*sin(2*(drones.ang_speed(j)*t+drones.init_theta(j)));
-            drones.pos(j,1) = drones.scale.*(drones.c(j)*Xm - drones.s(j)*Ym);
-            drones.pos(j,2) = drones.scale.*(drones.s(j)*Xm + drones.c(j)*Ym); 
+            drones.pos(j,1) = drones.scale.*(drones.c(j)*Xm - drones.beta(j)*Ym);
+            drones.pos(j,2) = drones.scale.*(drones.beta(j)*Xm + drones.c(j)*Ym); 
         end
     elseif(drones.orbit_flag==4)
         for j=1:drones.num
@@ -470,40 +470,38 @@ function drones = update_pos(drones, t)
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [tot_v_x, tot_v_y] = update_vel(drones, x, y, N, target)
-    tot_v_x = target.relax_v_x; tot_v_y = target.relax_v_y; dim=2; s=0.6;  
+    tot_v_x = target.relax_v_x; tot_v_y = target.relax_v_y; dim=2; beta=0.6;  
     
-    B = gamma((dim+2)/(2*s))/(dim*gamma(dim/(2*s)));
-    C = 2^(dim/2)*gamma(dim/2); 
-    A = C*((s*B^(dim/2))/(gamma(dim/(2*s))))*(((2*pi)^dim)*det(drones.Sigma))^(-1/2);
+    B = gamma((dim+2)/(2*beta))/(dim*gamma(dim/(2*beta)));
+    A = (B/pi)^(dim/2)*(gamma(dim/2)*beta)/(gamma(dim/(2*beta))*det(drones.Sigma)^(1/2));
     
     for k=1:drones.num
         grad_p_x = zeros(N,N); grad_p_y = grad_p_x;
         for i=2:N+1
             for j=2:N+1
                 xv=[x(i-1); y(j-1)]; q = [drones.pos(k,1); drones.pos(k,2)]; 
-                p = A*exp(-(B*(xv-q)'*inv(drones.Sigma)*(xv-q))^s);
-                grad_p = -2*s*p*B*(B*(xv-q)'*inv(drones.Sigma)*(xv-q))^(s-1)*inv(drones.Sigma)*(xv-q);  
+                p = A*exp(-(B*(xv-q)'*inv(drones.Sigma)*(xv-q))^beta);
+                grad_p = -2*beta*p*B*(B*(xv-q)'*inv(drones.Sigma)*(xv-q))^(beta-1)*inv(drones.Sigma)*(xv-q);  
                 grad_p_x(j-1,i-1) = grad_p(1,1); grad_p_y(j-1,i-1) = grad_p(2,1); 
             end
         end
-        tot_v_x(2:N+1,2:N+1) = tot_v_x(2:N+1,2:N+1) - drones.d*grad_p_x; 
-        tot_v_y(2:N+1,2:N+1) = tot_v_y(2:N+1,2:N+1) - drones.d*grad_p_y; 
+        tot_v_x(2:N+1,2:N+1) = tot_v_x(2:N+1,2:N+1) - target.delta*grad_p_x; 
+        tot_v_y(2:N+1,2:N+1) = tot_v_y(2:N+1,2:N+1) - target.delta*grad_p_y; 
     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function dif = update_dif(drones, x, y, N)
-    dif = zeros(N,N); dim=2; s=0.6; 
+    dif = zeros(N,N); dim=2; beta=0.6; 
     
-    B = gamma((dim+2)/(2*s))/(dim*gamma(dim/(2*s)));
-    C = 2^(dim/2)*gamma(dim/2); 
-    A = C*((s*B^(dim/2))/(gamma(dim/(2*s))))*(((2*pi)^dim)*det(drones.Sigma))^(-1/2);
+    B = gamma((dim+2)/(2*beta))/(dim*gamma(dim/(2*beta)));
+    A = (B/pi)^(dim/2)*(gamma(dim/2)*beta)/(gamma(dim/(2*beta))*det(drones.Sigma)^(1/2));
     
     for k=1:drones.num
         p = zeros(N,N);
         for i=1:N
             for j=1:N
                 xv=[x(i); y(j)]; q = [drones.pos(k,1); drones.pos(k,2)]; 
-                p(j,i) = A*exp(-(B*(xv-q)'*inv(drones.Sigma)*(xv-q))^s);
+                p(j,i) = A*exp(-(B*(xv-q)'*inv(drones.Sigma)*(xv-q))^beta);
             end
         end
         dif = dif + p;  
