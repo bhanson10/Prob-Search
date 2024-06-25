@@ -15,7 +15,7 @@ IM_TYPE = 1; %0: Paper figure, 1: Presentation Figure
 
 % Gaussian Implementation
 dt = 0.005; N=51; L=6; d=L/(N-1); x=[-L/2:d:L/2]; y=[-L/2:d:L/2]; d_x = d; d_y = d;
-xvbar=[0; 0]; Sigma =[1 0.4; 0.4 1]; lambda=1; [X_mesh,Y_mesh] = meshgrid(x,y); beta = 2; flag=0; % 0: analytical solution
+xvbar=[0; 0]; Sigma =[1 0.4; 0.4 1]; lambda=0.5; [X_mesh,Y_mesh] = meshgrid(x,y); beta = 2; flag=0; % 0: analytical solution
 if(IM_TYPE==1)
     title_str = "./Figures/Presentation/Gauss_" + num2str(beta)+ "/Gauss_" + num2str(beta); 
 else
