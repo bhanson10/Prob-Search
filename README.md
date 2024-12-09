@@ -1,5 +1,5 @@
 # Prob-Search
-The "Prob-Search" repository contains the codebase accompanying the paper "An Extensible Framework for Probabilistic Search of Stationary or Randomly-moving Targets Characterized by Generalized Gaussian Distributions (GGDs) or Experimentally-defined Regions of Interest (ROI)" submitted to Communications in Statistics -- Theory and Methods. Below is an in-depth summary
+The "Prob-Search" repository contains the codebase accompanying the paper "An Extensible Framework for Probabilistic Search of Stationary or Randomly-moving Targets Characterized by Generalized Gaussian Distributions (GGDs) or Experimentally-defined Regions of Interest (ROI)" accepted to Communications in Statistics - Theory and Methods. Below is an in-depth summary
 explaining the proper usage of all the software included in said repository. In all, the codebase provides the computational framework necessary
 to: <br> <br>
 
